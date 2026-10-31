@@ -1,490 +1,761 @@
 #!/usr/bin/env python3
 """
-PSA-DIAG Screenshot & Visual Asset Generator
-Produces high-resolution PNG screenshots of:
-1. Engine Bay Sensor Location Schematic Diagram (Detailed Vector Graphic)
-2. Terminal TUI Tab 8: Engine Bay & Sensors Map
-3. Terminal TUI Tab 2: LiveData Gauges (btop-style)
-4. Terminal TUI Tab 1: Extended Multi-Module DTC Scan
-5. Terminal TUI Connection Wizard & Adapter Link Screen
-6. Pre-Purchase Inspection (PPI) 10-Point Health Scorecard
-7. Mobile Web Companion Dashboard
+PSA-DIAG Enhanced Screenshot Generator (V2)
+Produces realistic, high-fidelity visual assets for GitHub README:
+1. screenshot_01_engine_bay_diagram.png (Composite of real 3D DV6 engine bay + HUD diagnostic callout overlay)
+2. screenshot_02_tui_engine_tab.png (TUI Tab 8 with contoured mechanical engine ASCII art)
+3. screenshot_03_tui_livedata.png (TUI Tab 2 with live sparklines and hierarchical gauges)
+4. screenshot_04_tui_dtc_scan.png (TUI Tab 1 with deep PSA freeze-frame environmental telemetry)
+5. screenshot_05_connection_wizard.png (Connection wizard with OBD physical pinout bus diagnostics)
+6. screenshot_06_health_scorecard.png (Realistic 82/100 Pre-Purchase Inspection scorecard with authentic DV6 findings)
 """
 
 import os
 import sys
-import subprocess
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-# Add local path
 sys.path.insert(0, '/root/psa_diag')
 import engine_diagram
-import workshop_features
-import special_diagnostics
-import advanced_features
 
-ARTIFACTS_DIR = "/root/.gemini/antigravity-cli/brain/e9c76695-36c4-430d-99fa-5fef81e4a748"
-LOCAL_DIR = "/root/psa_diag/screenshots"
-os.makedirs(ARTIFACTS_DIR, exist_ok=True)
-os.makedirs(LOCAL_DIR, exist_ok=True)
+OUTPUT_DIR = "/root/psa_diag/screenshots"
+ARTIFACT_DIR = "/root/.gemini/antigravity-cli/brain/e9c76695-36c4-430d-99fa-5fef81e4a748"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(ARTIFACT_DIR, exist_ok=True)
 
-FONT_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-FONT_BOLD_PATH = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+# Fonts
+FONT_TITLE = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 20)
+FONT_SUB = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 12)
+FONT_HEAD = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 13)
+FONT_TEXT = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 11)
+FONT_TEXT_BOLD = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 11)
+FONT_MONO = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 12)
+FONT_MONO_SM = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', 10)
+FONT_MONO_XS = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', 9)
+FONT_TUI = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf', 12)
+FONT_TUI_BOLD = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 12)
 
 # ==============================================================================
-# 1. DETAILED ENGINE BAY SENSOR VECTOR DIAGRAM (SVG -> PNG)
+# 1. SCREENSHOT 01: REALISTIC 3D DV6 ENGINE BAY DIAGNOSTIC HUD
 # ==============================================================================
 
-def generate_engine_bay_vector_svg() -> str:
-    vals = engine_diagram.get_live_sensor_values(is_sim=True)
+def generate_screenshot_01():
+    print("Generating Screenshot 01: Realistic DV6 Engine Bay Diagnostic HUD...")
+    W, H = 1920, 1080
+    canvas = Image.new('RGB', (W, H), '#080b0f')
+    draw = ImageDraw.Draw(canvas)
 
-    # 20 Sensor coordinates & metadata on the 1800x1100 canvas
-    # Layout: Left is Engine Bay (1100w), Right is Sensor Table (650w)
-    sensors = [
-        (1, "MAF Sensor", 160, 680, f"{vals['maf_mg']} mg", "Air Intake", "Rear-left duct near airbox", "#00e5ff"),
-        (2, "Garrett Turbo", 750, 290, f"{vals['boost_bar']} bar", "Boost", "Front-center behind heatshield", "#ff9100"),
-        (3, "Intercooler", 320, 160, f"{vals['intercooler_dp']} bar dp", "Charge Air", "Lower front bumper pack", "#00e5ff"),
-        (4, "MAP / IAT", 290, 310, f"{vals['map_mbar']} mb", "Intake", "Air distributor manifold", "#00e5ff"),
-        (5, "HP CP1H Pump", 160, 480, f"{vals['fuel_temp_c']} °C", "Common Rail", "Upper left of cylinder head", "#ffd600"),
-        (6, "Common Rail", 510, 470, f"{vals['rail_press_bar']} bar", "Common Rail", "Under intake manifold", "#ffd600"),
-        (7, "Rail Pressure", 680, 470, f"{vals['rail_target_bar']} bar", "Sensor", "Underside of central rail", "#ffd600"),
-        (8, "Injectors 1-4", 510, 390, f"Bal: {vals['inj_balance_c1']:+.1f}", "Fuel", "Cylinder head wells (1-4)", "#ffd600"),
-        (9, "VNT Solenoid", 820, 210, f"{vals['vnt_duty_pct']}%", "Vacuum", "Bulkhead near brake servo", "#ff9100"),
-        (10, "Pre-Cat EGT", 960, 310, f"{vals['egt_temp_c']} °C", "Exhaust", "Top elbow of DPF/catalyst", "#ff1744"),
-        (11, "DPF (FAP)", 960, 470, f"{vals['dpf_soot_g']} g", "Filter", "Vertical canister in front", "#ff5252"),
-        (12, "Diff Pressure", 960, 620, f"{vals['dpf_diff_mbar']} mb", "Exhaust", "Mounted on battery tray", "#ff5252"),
-        (13, "EGR Valve", 750, 660, f"{vals['egr_pos_pct']}%", "Emissions", "Rear right of cylinder head", "#b388ff"),
-        (14, "ECT Temp", 510, 670, f"{vals['coolant_c']} °C", "Cooling", "Water housing above gearbox", "#00e676"),
-        (15, "CKP Crank", 160, 830, f"{vals['engine_rpm']} RPM", "Timing", "Lower front crank pulley", "#00e676"),
-        (16, "CMP Cam", 290, 210, f"{vals['cam_sync']}", "Timing", "Front of cylinder head", "#00e676"),
-        (17, "EGS6 Gearbox", 510, 830, f"{vals['gear_selected']}", "Trans", "Right bay under battery", "#00e5ff"),
-        (18, "EGS6 Pump", 690, 830, f"{vals['egs6_press_bar']} bar", "Hydraulic", "Top front of transmission", "#00e5ff"),
-        (19, "Clutch Slave", 870, 830, f"{vals['clutch_pos_mm']} mm", "Clutch", "Bellhousing fork actuator", "#00e5ff"),
-        (20, "12V Battery", 960, 830, f"{vals['battery_v']} V", "Electric", "Rear right bay + BSM box", "#ffd600")
+    # 1. Header Bar
+    draw.rectangle([(0, 0), (W, 70)], fill='#0d1117')
+    draw.line([(0, 70), (W, 70)], fill='#00e5ff', width=2)
+    
+    # Title & Subtitle
+    draw.text((28, 14), "CITROËN GRAND C4 PICASSO Mk1 (B58) • 1.6 HDi DV6TED4 (9HZ)", fill='#ffffff', font=FONT_TITLE)
+    draw.text((28, 42), "20-NODE POWERTRAIN SENSOR & ACTUATOR ARCHITECTURE • BOSCH EDC16C34 • EGS6 CFC300P", fill='#00e5ff', font=FONT_SUB)
+
+    # Header Badges
+    badges = [
+        ("CAN 2.0B 500k", "#00e676"),
+        ("BOSCH EDC16", "#00e5ff"),
+        ("EGS6 PILOT", "#ffd600"),
+        ("CAAR AIR SUSP", "#b388ff"),
+        ("ONLINE [DEMO]", "#00e676")
+    ]
+    bx = W - 30
+    for txt, col in reversed(badges):
+        tw = draw.textlength(txt, font=FONT_MONO_SM) + 16
+        bx -= tw + 8
+        draw.rounded_rectangle([(bx, 20), (bx + tw, 48)], radius=4, fill='#161b22', outline=col, width=1)
+        draw.text((bx + 8, 27), txt, fill=col, font=FONT_MONO_SM)
+
+    # 2. Engine Model Render Placement (Left Area: 1220 x 870)
+    img_model_path = "/root/psa_diag/screenshots/engine_bay_3d_model.jpg"
+    img_engine = Image.open(img_model_path)
+    
+    # Scale engine to fit
+    eng_box_w = 1220
+    eng_box_h = int(eng_box_w * (img_engine.height / img_engine.width)) # approx 680
+    eng_resized = img_engine.resize((eng_box_w, eng_box_h), Image.Resampling.LANCZOS)
+    
+    # Engine display container frame
+    frame_x, frame_y = 24, 88
+    frame_w, frame_h = 1240, 910
+    draw.rounded_rectangle([(frame_x, frame_y), (frame_x + frame_w, frame_y + frame_h)], radius=8, fill='#0d1117', outline='#21262d', width=2)
+    
+    # Paste resized engine model
+    canvas.paste(eng_resized, (frame_x + 10, frame_y + 10))
+
+    # Corner HUD brackets on engine frame
+    bracket_len = 24
+    brackets = [
+        ((frame_x + 10, frame_y + 10), (frame_x + 10 + bracket_len, frame_y + 10), (frame_x + 10, frame_y + 10 + bracket_len)),
+        ((frame_x + frame_w - 10, frame_y + 10), (frame_x + frame_w - 10 - bracket_len, frame_y + 10), (frame_x + frame_w - 10, frame_y + 10 + bracket_len)),
+        ((frame_x + 10, frame_y + frame_h - 10), (frame_x + 10 + bracket_len, frame_y + frame_h - 10), (frame_x + 10, frame_y + frame_h - 10 - bracket_len)),
+        ((frame_x + frame_w - 10, frame_y + frame_h - 10), (frame_x + frame_w - 10 - bracket_len, frame_y + frame_h - 10), (frame_x + frame_w - 10, frame_y + frame_h - 10 - bracket_len)),
+    ]
+    for p_corner, p_h, p_v in brackets:
+        draw.line([p_corner, p_h], fill='#00e5ff', width=3)
+        draw.line([p_corner, p_v], fill='#00e5ff', width=3)
+
+    # 3. Precise Engine Component HUD Pins & Callout Cards
+    # Coords relative to (frame_x + 10, frame_y + 10)
+    ox, oy = frame_x + 10, frame_y + 10
+    callouts = [
+        (1, "MAF & IAT SENSOR", 485.0, "mg/str", ox + 220, oy + 320, ox + 140, oy + 240, "#00e5ff"),
+        (2, "GARRETT GT1544V TURBO", 1.02, "bar", ox + 610, oy + 260, ox + 610, oy + 160, "#ff9100"),
+        (3, "CHARGE INTERCOOLER", 0.04, "bar dp", ox + 420, oy + 160, ox + 320, oy + 100, "#00e5ff"),
+        (4, "MAP / IAT SENSOR", 1024, "mbar", ox + 490, oy + 290, ox + 380, oy + 220, "#00e5ff"),
+        (5, "CP1H HP FUEL PUMP", 38.5, "°C", ox + 380, oy + 390, ox + 260, oy + 440, "#ffd600"),
+        (6, "COMMON FUEL RAIL", 298.0, "bar", ox + 560, oy + 380, ox + 560, oy + 470, "#ffd600"),
+        (8, "INJECTORS 1-4 (Cyl 1 R)", "+0.2", "mg", ox + 650, oy + 360, ox + 760, oy + 430, "#ffd600"),
+        (10, "PRE-CAT EGT SENSOR", 188.0, "°C", ox + 720, oy + 220, ox + 840, oy + 150, "#ff1744"),
+        (11, "DPF / CATALYST CANISTER", 18.4, "g soot", ox + 700, oy + 280, ox + 860, oy + 250, "#ff5252"),
+        (13, "EGR VALVE ACTUATOR", 34.0, "%", ox + 820, oy + 330, ox + 950, oy + 350, "#b388ff"),
+        (14, "COOLANT TEMP (ECT)", 86.4, "°C", ox + 770, oy + 440, ox + 890, oy + 480, "#00e676"),
+        (17, "EGS6 PILOTED GEARBOX", "N", "gear", ox + 810, oy + 530, ox + 950, oy + 580, "#00e5ff"),
+        (18, "EGS6 HYDRAULIC ACCUM", 48.2, "bar", ox + 710, oy + 560, ox + 600, oy + 610, "#00e5ff"),
+        (20, "12V BATTERY & BSM FUSE", 14.28, "V", ox + 960, oy + 380, ox + 1070, oy + 440, "#ffd600"),
     ]
 
-    svg_nodes = ""
-    for nid, title, x, y, val_str, cat, loc, col in sensors:
-        svg_nodes += f"""
-        <!-- Sensor Node #{nid:02d} -->
-        <g transform="translate({x},{y})">
-          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="{col}" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
-          <circle cx="-56" cy="-10" r="14" fill="{col}" opacity="0.25"/>
-          <circle cx="-56" cy="-10" r="14" fill="none" stroke="{col}" stroke-width="1.5"/>
-          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="{col}" text-anchor="middle">{nid:02d}</text>
-          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">{title}</text>
-          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">{val_str}</text>
-          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">{cat}</text>
-        </g>
-        """
+    for cid, cname, cval, cunit, px, py, cx, cy, col in callouts:
+        # Target Pin circle at actual component
+        draw.ellipse([(px - 8, py - 8), (px + 8, py + 8)], fill=col, outline='#ffffff', width=2)
+        draw.ellipse([(px - 14, py - 14), (px + 14, py + 14)], fill=None, outline=col, width=1)
+        
+        # Leader line with elbow
+        elbow_x = cx - 20 if cx > px else cx + 20
+        draw.line([(px, py), (elbow_x, cy), (cx, cy)], fill=col, width=2)
+        
+        # HUD Tag box
+        tag_w = 175
+        tag_h = 36
+        tag_x = cx if cx < px else cx - tag_w
+        tag_y = cy - tag_h // 2
+        
+        draw.rounded_rectangle([(tag_x, tag_y), (tag_x + tag_w, tag_y + tag_h)], radius=4, fill='#161b22', outline=col, width=1)
+        draw.text((tag_x + 8, tag_y + 4), f"[{cid:02d}] {cname}", fill='#ffffff', font=FONT_TEXT_BOLD)
+        draw.text((tag_x + 8, tag_y + 18), f"{cval} {cunit}", fill=col, font=FONT_MONO_SM)
 
-    # Table rows for right sidebar
-    table_rows = ""
-    for s_id in range(1, 21):
-        s = engine_diagram.SENSOR_DATABASE[s_id]
+    # Bottom Telemetry Bar inside engine frame (frame_y + frame_h - 180 to bottom)
+    bar_y = frame_y + eng_box_h + 16
+    draw.rounded_rectangle([(frame_x + 10, bar_y), (frame_x + frame_w - 10, frame_y + frame_h - 10)], radius=6, fill='#11161d', outline='#30363d', width=1)
+    
+    # 6 Live Gauges in bottom strip
+    gauges = [
+        ("ENGINE RPM", "850 RPM", "Idle Nominal", "#00e676", 850, 4500),
+        ("RAIL PRESSURE", "298 bar", "Target: 295 bar", "#ffd600", 298, 1600),
+        ("TURBO BOOST", "1.02 bar", "Max: 2.35 bar", "#ff9100", 1.02, 2.5),
+        ("COOLANT (ECT)", "86.4 °C", "Thermostat OK", "#00e676", 86.4, 120),
+        ("EGS6 HYDRAULIC", "48.2 bar", "Pump Cutout 50b", "#00e5ff", 48.2, 60),
+        ("BATTERY / BSM", "14.28 V", "Alternator Charging", "#00e676", 14.28, 16),
+    ]
+    gw = (frame_w - 40) // 6
+    for i, (gtitle, gval, gsub, gcol, val_num, max_num) in enumerate(gauges):
+        gx = frame_x + 18 + i * gw
+        gy = bar_y + 8
+        draw.text((gx, gy), gtitle, fill='#8b949e', font=FONT_MONO_XS)
+        draw.text((gx, gy + 16), gval, fill=gcol, font=FONT_HEAD)
+        draw.text((gx, gy + 34), gsub, fill='#8b949e', font=FONT_MONO_XS)
+        
+        # Mini bar
+        pct = min(1.0, val_num / max_num)
+        bar_len = gw - 24
+        draw.rectangle([(gx, gy + 52), (gx + bar_len, gy + 56)], fill='#21262d')
+        draw.rectangle([(gx, gy + 52), (gx + int(bar_len * pct), gy + 56)], fill=gcol)
+
+    # 4. Right Sidebar: 20-Node Sensor & Telemetry Matrix (x=1284, w=612)
+    side_x, side_y = 1284, 88
+    side_w, side_h = 612, 910
+    draw.rounded_rectangle([(side_x, side_y), (side_x + side_w, side_y + side_h)], radius=8, fill='#0d1117', outline='#21262d', width=2)
+    
+    # Sidebar Header
+    draw.rectangle([(side_x, side_y), (side_x + side_w, side_y + 44)], fill='#161b22')
+    draw.text((side_x + 16, side_y + 14), "POWERTRAIN SENSOR TELEMETRY & PINOUT MATRIX", fill='#00e5ff', font=FONT_HEAD)
+    draw.line([(side_x, side_y + 44), (side_x + side_w, side_y + 44)], fill='#30363d', width=1)
+
+    # Table Column Headers
+    ty = side_y + 48
+    draw.rectangle([(side_x + 6, ty), (side_x + side_w - 6, ty + 24)], fill='#11161d')
+    draw.text((side_x + 14, ty + 6), "ID", fill='#8b949e', font=FONT_MONO_XS)
+    draw.text((side_x + 40, ty + 6), "SENSOR NAME", fill='#8b949e', font=FONT_MONO_XS)
+    draw.text((side_x + 230, ty + 6), "LIVE VALUE", fill='#8b949e', font=FONT_MONO_XS)
+    draw.text((side_x + 340, ty + 6), "STATUS", fill='#8b949e', font=FONT_MONO_XS)
+    draw.text((side_x + 430, ty + 6), "CONNECTOR / PINOUT", fill='#8b949e', font=FONT_MONO_XS)
+
+    # Table rows
+    ty += 28
+    vals = engine_diagram.get_live_sensor_values(is_sim=True)
+    row_h = 41
+    for sid in range(1, 21):
+        s = engine_diagram.SENSOR_DATABASE[sid]
         v = vals.get(s['param_key'], 'N/A')
         u = s['unit']
-        v_str = f"{v} {u}".replace('&', '&amp;')
         st_txt, _ = engine_diagram.evaluate_sensor_status(v, s)
-        bg = "#11161d" if s_id % 2 == 0 else "#161b22"
-        badge_col = "#00e676" if st_txt in ("NOMINAL", "OK") else "#ffd600"
-
-        clean_name = s['name'][:24].replace('&', '&amp;')
-        clean_loc = s['location'][:30].replace('&', '&amp;')
-
-        table_rows += f"""
-        <tr style="background:{bg}; font-size:11px;">
-          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[{s_id:02d}]</td>
-          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">{clean_name}</td>
-          <td style="padding:6px 8px; color:#8b949e;">{clean_loc}...</td>
-          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">{v_str}</td>
-          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:{badge_col}; border:1px solid {badge_col}; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">{st_txt}</span></td>
-        </tr>
-        """
-
-    svg = f"""<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1100" viewBox="0 0 1800 1100">
-  <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#080b0f"/>
-      <stop offset="50%" stop-color="#0d1117"/>
-      <stop offset="100%" stop-color="#161b22"/>
-    </linearGradient>
-    <linearGradient id="engineBlock" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#1c2128"/>
-      <stop offset="50%" stop-color="#21262d"/>
-      <stop offset="100%" stop-color="#1c2128"/>
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="6" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
-    </filter>
-  </defs>
-
-  <!-- Canvas Background -->
-  <rect width="1800" height="1100" fill="url(#bgGrad)"/>
-
-  <!-- Top Title Banner -->
-  <rect x="25" y="20" width="1750" height="70" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
-  <text x="50" y="52" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="bold" fill="#00e5ff" letter-spacing="1">🚗 CITROËN GRAND C4 PICASSO Mk1 (B58) • 1.6 HDi DV6 DIESEL</text>
-  <text x="50" y="74" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" fill="#8b949e">ENGINE BAY ARCHITECTURE &amp; SENSOR LOCATION MAP • 6-SPEED EGS6 PILOTED MANUAL TRANSMISSION (CFC300P)</text>
-  <rect x="1560" y="36" width="190" height="36" rx="6" fill="rgba(0,229,255,0.15)" stroke="#00e5ff" stroke-width="1"/>
-  <text x="1655" y="60" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e5ff" text-anchor="middle">AEE2004 500kbps CAN</text>
-
-  <!-- LEFT PANE: ENGINE BAY SCHEMATIC (Width: 1100) -->
-  <g transform="translate(25, 110)">
-    <!-- Engine Bay Outer Chassis Perimeter -->
-    <rect x="0" y="0" width="1090" height="960" rx="16" fill="#0d1117" stroke="#30363d" stroke-width="2"/>
-    
-    <!-- Top & Bottom Boundaries -->
-    <rect x="20" y="20" width="1050" height="38" rx="6" fill="#161b22" stroke="#21262d"/>
-    <text x="545" y="44" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#484f58" text-anchor="middle" letter-spacing="2">FRONT BUMPER / RADIATOR PACK / CRASH STRUCTURE</text>
-
-    <rect x="20" y="900" width="1050" height="38" rx="6" fill="#161b22" stroke="#21262d"/>
-    <text x="545" y="924" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#484f58" text-anchor="middle" letter-spacing="2">CABIN BULKHEAD / SCUTTLE TRAY / BRAKE SERVO</text>
-
-    <!-- Airflow Piping (Cold side Cyan, Hot side Orange) -->
-    <!-- Intercooler to MAP pipe -->
-    <path d="M 320 195 L 320 280 L 290 280" fill="none" stroke="#00e5ff" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
-    <!-- Turbo to Intercooler pipe -->
-    <path d="M 750 260 L 750 160 L 400 160" fill="none" stroke="#ff9100" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
-    <!-- Exhaust to DPF pipe -->
-    <path d="M 830 290 L 960 290 L 960 440" fill="none" stroke="#ff1744" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
-    <!-- Fuel Rail High Pressure line -->
-    <path d="M 240 480 L 430 480 L 430 470 L 600 470" fill="none" stroke="#ffd600" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
-
-    <!-- Aluminium Cylinder Head Casting -->
-    <rect x="200" y="350" width="620" height="190" rx="14" fill="url(#engineBlock)" stroke="#00e5ff" stroke-width="2" opacity="0.9"/>
-    <text x="510" y="375" font-family="'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="bold" fill="#00e5ff" text-anchor="middle" letter-spacing="2">DV6 1.6 HDi 16V / 8V DIESEL CYLINDER HEAD</text>
-    <text x="230" y="525" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#8b949e">TIMING BELT (LEFT)</text>
-    <text x="790" y="525" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#8b949e" text-anchor="end">FLYWHEEL / GEARBOX (RIGHT)</text>
-
-    <!-- Cylinders 4, 3, 2, 1 -->
-    <g transform="translate(250, 410)">
-      <!-- Cyl 4 -->
-      <circle cx="80" cy="50" r="30" fill="#161b22" stroke="#30363d" stroke-width="2"/>
-      <text x="80" y="55" font-family="monospace" font-size="13" font-weight="bold" fill="#c9d1d9" text-anchor="middle">CYL 4</text>
-      <!-- Cyl 3 -->
-      <circle cx="210" cy="50" r="30" fill="#161b22" stroke="#30363d" stroke-width="2"/>
-      <text x="210" y="55" font-family="monospace" font-size="13" font-weight="bold" fill="#c9d1d9" text-anchor="middle">CYL 3</text>
-      <!-- Cyl 2 -->
-      <circle cx="340" cy="50" r="30" fill="#161b22" stroke="#30363d" stroke-width="2"/>
-      <text x="340" y="55" font-family="monospace" font-size="13" font-weight="bold" fill="#c9d1d9" text-anchor="middle">CYL 2</text>
-      <!-- Cyl 1 -->
-      <circle cx="470" cy="50" r="30" fill="#161b22" stroke="#00e5ff" stroke-width="2.5"/>
-      <text x="470" y="55" font-family="monospace" font-size="13" font-weight="bold" fill="#00e5ff" text-anchor="middle">CYL 1</text>
-    </g>
-
-    <!-- Transmission Casting (EGS6) -->
-    <rect x="420" y="780" width="530" height="100" rx="12" fill="#161b22" stroke="#ffd600" stroke-width="1.8" opacity="0.85"/>
-    <text x="685" y="805" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="bold" fill="#ffd600" text-anchor="middle">EGS6 6-SPEED ROBOTIZED TRANSMISSION CASING</text>
-
-    <!-- Battery Box Silhouette -->
-    <rect x="880" y="780" width="160" height="100" rx="10" fill="#161b22" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="4 4"/>
-    <text x="960" y="805" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="bold" fill="#8b949e" text-anchor="middle">12V BATTERY / BSM</text>
-
-    <!-- Air Filter Box Silhouette -->
-    <rect x="80" y="630" width="160" height="100" rx="10" fill="#161b22" stroke="#00e5ff" stroke-width="1.5" stroke-dasharray="4 4"/>
-    <text x="160" y="655" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="bold" fill="#8b949e" text-anchor="middle">AIR CLEANER BOX</text>
-
-    <!-- Insert all 20 Sensor Nodes -->
-    {svg_nodes}
-  </g>
-
-  <!-- RIGHT PANE: SENSOR DATABASE & LOCATION LEGEND (Width: 640) -->
-  <g transform="translate(1135, 110)">
-    <rect x="0" y="0" width="640" height="960" rx="16" fill="#0d1117" stroke="#30363d" stroke-width="2"/>
-    
-    <!-- Table Header Banner -->
-    <rect x="15" y="15" width="610" height="42" rx="8" fill="#161b22" stroke="#30363d"/>
-    <text x="30" y="42" font-family="'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="bold" fill="#00e5ff">📋 20-NODE SENSOR CATALOG &amp; TEST SPECS</text>
-
-    <!-- Embed ForeignObject Table -->
-    <foreignObject x="15" y="65" width="610" height="880">
-      <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Segoe UI',Roboto,sans-serif; color:#c9d1d9;">
-        <table style="width:100%; border-collapse:collapse;">
-          <thead>
-            <tr style="background:#161b22; text-align:left; font-size:11px; color:#8b949e; border-bottom:1px solid #30363d;">
-              <th style="padding:6px 8px;">ID</th>
-              <th style="padding:6px 8px;">Sensor Name</th>
-              <th style="padding:6px 8px;">Physical Location</th>
-              <th style="padding:6px 8px;">Live Telemetry</th>
-              <th style="padding:6px 8px;">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {table_rows}
-          </tbody>
-        </table>
+        badge_col = '#00e676' if st_txt in ('NOMINAL', 'OK') else '#ffd600'
         
-        <div style="margin-top:14px; padding:10px 14px; background:#161b22; border:1px solid #30363d; border-radius:6px; font-size:11px; line-height:1.5;">
-          <div style="color:#00e5ff; font-weight:bold; margin-bottom:4px;">📌 TECHNICIAN DIAGNOSTIC NOTES (DV6 1.6 HDi):</div>
-          • <b>Cylinder Numbering:</b> PSA counts Cylinder 1 at the <b>flywheel/gearbox side</b> (right side of engine bay).<br/>
-          • <b>Common Rail Pressure:</b> Normal warm idle is 250–300 bar (~1.0–1.2V signal from rail sensor [07]).<br/>
-          • <b>EGS6 Hydraulics:</b> Nominal accumulator pressure [18] is 40–50 bar. Pump auto-priming on driver door open.
-        </div>
-      </div>
-    </foreignObject>
-  </g>
-</svg>
-"""
-    return svg
+        bg_col = '#11161d' if sid % 2 == 0 else '#0d1117'
+        draw.rectangle([(side_x + 6, ty), (side_x + side_w - 6, ty + row_h - 2)], fill=bg_col)
+        
+        # ID & Name
+        draw.text((side_x + 12, ty + 6), f"[{sid:02d}]", fill='#00e5ff', font=FONT_MONO_SM)
+        draw.text((side_x + 40, ty + 6), s['name'][:24], fill='#ffffff', font=FONT_TEXT_BOLD)
+        draw.text((side_x + 40, ty + 22), s['location'][:26], fill='#8b949e', font=FONT_MONO_XS)
+        
+        # Live Value
+        draw.text((side_x + 230, ty + 12), f"{v} {u}", fill='#00e676', font=FONT_MONO_SM)
+        
+        # Status Badge
+        draw.rounded_rectangle([(side_x + 340, ty + 10), (side_x + 412, ty + 28)], radius=3, fill='#161b22', outline=badge_col, width=1)
+        draw.text((side_x + 348, ty + 13), st_txt, fill=badge_col, font=FONT_MONO_XS)
+        
+        # Pinout info
+        draw.text((side_x + 430, ty + 12), s['connector'][:22] + "...", fill='#c9d1d9', font=FONT_MONO_XS)
+        
+        ty += row_h
+
+    # 5. Bottom Status Ticker Bar (H - 60 to H - 10)
+    bot_y = H - 60
+    draw.rectangle([(0, bot_y), (W, H)], fill='#0d1117')
+    draw.line([(0, bot_y), (W, bot_y)], fill='#21262d', width=1)
+    
+    status_left = "● LINK ACTIVE: SocketCAN /dev/ttyUSB0 (STN1170 OBDLink SX @ 115,200 bps) • Protocol: ISO 15765-4 (CAN 11-bit / 500 kbps)"
+    status_right = "CAN Frames: 1,842 fps • Bus Load: 28.4% • Error Counter: 0 • PSA DTC Cache: 40,752 definitions"
+    draw.text((28, bot_y + 18), status_left, fill='#00e676', font=FONT_MONO_SM)
+    rw = draw.textlength(status_right, font=FONT_MONO_SM)
+    draw.text((W - rw - 28, bot_y + 18), status_right, fill='#8b949e', font=FONT_MONO_SM)
+
+    out_path = os.path.join(OUTPUT_DIR, "screenshot_01_engine_bay_diagram.png")
+    art_path = os.path.join(ARTIFACT_DIR, "screenshot_01_engine_bay_diagram.png")
+    canvas.save(out_path, format="PNG")
+    canvas.save(art_path, format="PNG")
+    print(f"Screenshot 01 saved successfully ({os.path.getsize(out_path)} bytes)")
 
 # ==============================================================================
-# 2. TERMINAL WINDOW SCREENSHOT RENDERER (PIL / Pillow)
+# 2. SCREENSHOT 02: TUI TAB 8 - CONTOURED ENGINE SCHEMATIC & SENSOR INSPECTOR
 # ==============================================================================
 
-def render_terminal_window(lines: list[tuple[str, tuple[int, int, int], bool]], title: str = "psa-diag • Citroën Grand C4 Picasso", width: int = 1200, height: int = 760) -> Image.Image:
-    """
-    Renders an elegant terminal window screenshot with titlebar, macOS traffic lights,
-    and anti-aliased monospace colored text.
-    """
-    img = Image.new('RGB', (width, height), color=(13, 17, 23))
+def generate_screenshot_02():
+    print("Generating Screenshot 02: TUI Tab 8 Contoured Engine Inspector...")
+    W, H = 1200, 800
+    img = Image.new('RGB', (W, H), '#080b0f')
     draw = ImageDraw.Draw(img)
 
-    # Window frame & background
-    draw.rectangle([(0, 0), (width, height)], fill=(13, 17, 23))
+    # Terminal Window Frame
+    draw.rectangle([(0, 0), (W, 36)], fill='#161b22')
+    draw.text((16, 10), "PSA-DIAG Terminal Workstation • 2010 Citroën Grand C4 Picasso Mk1 (B58) 1.6 HDi", fill='#c9d1d9', font=FONT_HEAD)
     
-    # Titlebar
-    draw.rectangle([(0, 0), (width, 38)], fill=(22, 27, 34))
-    draw.line([(0, 38), (width, 38)], fill=(48, 54, 61), width=1)
+    # Window controls (macOS/X11 style dots)
+    draw.ellipse([(W - 60, 12), (W - 48, 24)], fill='#ff5f56')
+    draw.ellipse([(W - 40, 12), (W - 28, 24)], fill='#ffbd2e')
+    draw.ellipse([(W - 20, 12), (W - 8, 24)], fill='#27c93f')
 
-    # Traffic light window buttons
-    draw.ellipse([(14, 13), (26, 25)], fill=(255, 95, 87))   # Close (Red)
-    draw.ellipse([(34, 13), (46, 25)], fill=(254, 188, 46))  # Minimize (Yellow)
-    draw.ellipse([(54, 13), (66, 25)], fill=(40, 201, 64))   # Zoom (Green)
+    # Tab bar
+    draw.rectangle([(0, 36), (W, 70)], fill='#0d1117')
+    draw.line([(0, 70), (W, 70)], fill='#30363d', width=1)
+    
+    tabs = [
+        ("1:DTC Scan", False),
+        ("2:LiveData", False),
+        ("3:Actuators", False),
+        ("4:Tools", False),
+        ("5:Telecode", False),
+        ("6:Sniffer", False),
+        ("7:LogPlayer", False),
+        ("8:Engine", True),
+        ("9:Audit", False)
+    ]
+    tx = 16
+    for tname, active in tabs:
+        tw = draw.textlength(tname, font=FONT_MONO) + 20
+        if active:
+            draw.rectangle([(tx, 42), (tx + tw, 70)], fill='#1c2128')
+            draw.line([(tx, 42), (tx + tw, 42)], fill='#00e5ff', width=3)
+            draw.text((tx + 10, 50), tname, fill='#00e5ff', font=FONT_MONO)
+        else:
+            draw.text((tx + 10, 50), tname, fill='#8b949e', font=FONT_MONO)
+        tx += tw + 4
 
-    # Window Title
-    font_title = ImageFont.truetype(FONT_BOLD_PATH, 13)
-    bbox = font_title.getbbox(title)
-    tx = (width - (bbox[2] - bbox[0])) // 2
-    draw.text((tx, 11), title, fill=(139, 148, 158), font=font_title)
+    # Dual Pane Split: Left Engine Contours (x=16, w=590), Right Sensor Catalog (x=618, w=566)
+    draw.rectangle([(16, 80), (606, 750)], fill='#0d1117', outline='#30363d', width=1)
+    draw.rectangle([(618, 80), (1184, 750)], fill='#0d1117', outline='#30363d', width=1)
+    
+    # Left Pane Header
+    draw.rectangle([(16, 80), (606, 110)], fill='#161b22')
+    draw.text((28, 88), "ENGINE BAY PHYSICAL TOP-DOWN SCHEMATIC (DV6TED4)", fill='#00e5ff', font=FONT_HEAD)
+    
+    # Contoured ASCII Art Lines
+    ascii_art = [
+        ("  [ FRONT CROSSMEMBER / RADIATOR PACK ]", "#8b949e"),
+        ("  ╔═════════════════════════════════════════════════════════════╗", "#30363d"),
+        ("  ║ [03] INTERCOOLER: 0.04 bar dp   │ [11] DPF & CAT: 18.4g soot║", "#00e5ff"),
+        ("  ║       │                                   │                 ║", "#8b949e"),
+        ("  ║   ┌───▼───┐ [04] MAP: 1024mb          ┌───▼───┐             ║", "#c9d1d9"),
+        ("  ║   │ INTAKE│ [16] CMP: SYNCHRONIZED    │ TURBO │ [02] 1.02bar║", "#c9d1d9"),
+        ("  ║   └───┬───┘                           └───┬───┘ [09] 42% VNT║", "#ff9100"),
+        ("  ║       │                                   │                 ║", "#8b949e"),
+        ("  ║   ┌───▼───────────────────────────────────▼─────────────┐   ║", "#00e5ff"),
+        ("  ║   │  DV6 1.6 HDi 16V CYLINDER HEAD (CAST ALLOY)        │   ║", "#ffffff"),
+        ("  ║   │  [TIMING BELT]                  [FLYWHEEL / GEARBOX]│   ║", "#8b949e"),
+        ("  ║   │                                                     │   ║", "#30363d"),
+        ("  ║   │   CYL 4         CYL 3         CYL 2         CYL 1   │   ║", "#ffd600"),
+        ("  ║   │    [08]          [08]          [08]          [08]   │   ║", "#ffd600"),
+        ("  ║   │  INJECTOR      INJECTOR      INJECTOR      INJECTOR │   ║", "#ffd600"),
+        ("  ║   │  +0.1 mg       +0.1 mg       -0.4 mg       +0.2 mg  │   ║", "#00e676"),
+        ("  ║   │                                                     │   ║", "#30363d"),
+        ("  ║   │  ===[06] FORGED COMMON RAIL: 298 bar (Tgt: 295)===  │   ║", "#ffd600"),
+        ("  ║   │  [05] CP1H PUMP: 38.5°C      [07] SENSOR: 1.14V     │   ║", "#ffd600"),
+        ("  ║   └───┬─────────────────────────────────┬───────────────┘   ║", "#00e5ff"),
+        ("  ║       │                                 │                   ║", "#8b949e"),
+        ("  ║   ┌───▼──────────────┐        ┌─────────▼─────────────────┐ ║", "#c9d1d9"),
+        ("  ║   │[01] AIRBOX & MAF │        │[17] EGS6 TRANSMISSION     │ ║", "#00e5ff"),
+        ("  ║   │     485 mg/str   │        │     Gear: [N] Neutral     │ ║", "#00e676"),
+        ("  ║   │[15] CRANK (CKP)  │        │[18] HPU PUMP: 48.2 bar    │ ║", "#00e5ff"),
+        ("  ║   │     850 RPM      │        │[19] CLUTCH: 14.8 mm       │ ║", "#00e676"),
+        ("  ║   └──────────────────┘        │[14] COOLANT: 86.4 °C      │ ║", "#00e676"),
+        ("  ║   ┌──────────────────┐        └───────────────────────────┘ ║", "#00e5ff"),
+        ("  ║   │[12] DPF DIFF: 8mb│        ┌───────────────────────────┐ ║", "#ff5252"),
+        ("  ║   │[10] EGT: 188 °C  │        │[20] 12V STARTER BATTERY   │ ║", "#ffd600"),
+        ("  ║   │[13] EGR: 34%     │        │     14.28 V (Charging OK) │ ║", "#00e676"),
+        ("  ║   └──────────────────┘        └───────────────────────────┘ ║", "#ffd600"),
+        ("  ╚═════════════════════════════════════════════════════════════╝", "#30363d"),
+        ("  [ CABIN BULKHEAD / SCUTTLE WATER TRAY ]", "#8b949e"),
+    ]
+    ay = 118
+    for line_txt, line_col in ascii_art:
+        draw.text((28, ay), line_txt, fill=line_col, font=FONT_TUI)
+        ay += 17
 
-    # Font for terminal content
-    font_mono = ImageFont.truetype(FONT_PATH, 13)
-    font_mono_bold = ImageFont.truetype(FONT_BOLD_PATH, 13)
+    # Right Pane: Sensor Inspector Card & Catalog
+    draw.rectangle([(618, 80), (1184, 110)], fill='#161b22')
+    draw.text((630, 88), "SENSOR CATALOG & COMPONENT INSPECTOR", fill='#00e5ff', font=FONT_HEAD)
+    
+    # Active Sensor Card (Sensor 02: Turbo)
+    draw.rounded_rectangle([(630, 120), (1172, 270)], radius=6, fill='#161b22', outline='#ff9100', width=1)
+    draw.text((644, 130), "SELECTED: [02] Garrett GT1544V Variable Geometry Turbo", fill='#ffffff', font=FONT_HEAD)
+    draw.text((644, 150), "• Subsystem: Forced Induction & Boost Control", fill='#c9d1d9', font=FONT_MONO_SM)
+    draw.text((644, 168), "• OEM Part Number: 0375.J6 / Garrett 753420-5005S", fill='#c9d1d9', font=FONT_MONO_SM)
+    draw.text((644, 186), "• Physical Location: Front-center of engine block behind heat shield", fill='#c9d1d9', font=FONT_MONO_SM)
+    draw.text((644, 204), "• Connector: 3-Pin Black (Pin 1: 5V, Pin 2: Signal, Pin 3: GND)", fill='#c9d1d9', font=FONT_MONO_SM)
+    draw.text((644, 222), "• Nominal Operating Spec: 0.98 - 1.05 bar (Idle) • Up to 2.35 bar (Boost)", fill='#c9d1d9', font=FONT_MONO_SM)
+    draw.text((644, 242), "LIVE VALUE: 1.02 bar  [ STATUS: NOMINAL ]", fill='#00e676', font=FONT_MONO)
 
-    # Draw terminal content lines
-    cur_y = 52
-    line_height = 19
-    for line_text, color_rgb, is_bold in lines:
-        if cur_y + line_height > height - 10:
-            break
-        chosen_font = font_mono_bold if is_bold else font_mono
-        draw.text((20, cur_y), line_text, fill=color_rgb, font=chosen_font)
-        cur_y += line_height
+    # Sensor List Table (Compact)
+    draw.rectangle([(630, 280), (1172, 304)], fill='#11161d')
+    draw.text((638, 288), "ID  SENSOR NAME             LIVE READING     STATUS", fill='#8b949e', font=FONT_MONO_XS)
+    
+    s_rows = [
+        ("[01]", "MAF & IAT Sensor", "485.0 mg/str", "NOMINAL", "#00e676"),
+        ("[02]", "Garrett VNT Turbo", "1.02 bar", "NOMINAL", "#00e676"),
+        ("[03]", "Charge Intercooler", "0.04 bar dp", "NOMINAL", "#00e676"),
+        ("[04]", "MAP / IAT Sensor", "1024 mbar", "NOMINAL", "#00e676"),
+        ("[05]", "CP1H High Press Pump", "38.5 °C", "NOMINAL", "#00e676"),
+        ("[06]", "Common Rail Pressure", "298.0 bar", "NOMINAL", "#00e676"),
+        ("[07]", "Rail Pressure Sensor", "295.0 bar tgt", "NOMINAL", "#00e676"),
+        ("[08]", "Injectors 1-4 Balance", "Bal: +0.2 mg", "NOMINAL", "#00e676"),
+        ("[09]", "VNT Electrovalve", "42.5 %", "NOMINAL", "#00e676"),
+        ("[10]", "Pre-Cat EGT Sensor", "188.0 °C", "NOMINAL", "#00e676"),
+        ("[11]", "DPF Soot Mass", "18.4 g", "NOMINAL", "#00e676"),
+        ("[12]", "DPF Diff Pressure", "8.5 mbar", "NOMINAL", "#00e676"),
+        ("[13]", "EGR Valve Position", "34.0 %", "NOMINAL", "#00e676"),
+        ("[14]", "Coolant Temp (ECT)", "86.4 °C", "NOMINAL", "#00e676"),
+        ("[17]", "EGS6 Gearbox State", "N (Neutral)", "NOMINAL", "#00e676"),
+        ("[18]", "EGS6 Line Pressure", "48.2 bar", "NOMINAL", "#00e676"),
+        ("[19]", "Clutch Slave Travel", "14.8 mm", "NOMINAL", "#00e676"),
+        ("[20]", "12V Battery Voltage", "14.28 V", "NOMINAL", "#00e676"),
+    ]
+    sry = 308
+    for sid, sname, sval, sstat, scol in s_rows:
+        draw.text((638, sry), f"{sid:<4} {sname:<23} {sval:<16}", fill='#ffffff', font=FONT_MONO_XS)
+        draw.text((1090, sry), sstat, fill=scol, font=FONT_MONO_XS)
+        sry += 23
 
-    return img
+    # Bottom Nav
+    draw.rectangle([(0, 760), (W, 800)], fill='#161b22')
+    draw.text((16, 772), "[▲/▼] Select Sensor  [1-9] Switch Tab  [SPACE] Toggle Detail  [D] Export SVG  [Q] Exit", fill='#c9d1d9', font=FONT_MONO_SM)
+
+    out_path = os.path.join(OUTPUT_DIR, "screenshot_02_tui_engine_tab.png")
+    art_path = os.path.join(ARTIFACT_DIR, "screenshot_02_tui_engine_tab.png")
+    img.save(out_path)
+    img.save(art_path)
+    print(f"Screenshot 02 saved successfully ({os.path.getsize(out_path)} bytes)")
 
 # ==============================================================================
-# 3. BUILD INDIVIDUAL SCREENSHOTS
+# 3. SCREENSHOT 03: TUI TAB 2 - LIVEDATA GAUGES & REAL-TIME SPARKLINES
 # ==============================================================================
 
-def generate_all():
-    print("[*] Generating high-resolution engine bay sensor schematic...")
-    svg_str = generate_engine_bay_vector_svg()
-    svg_path = os.path.join(LOCAL_DIR, "engine_diagram_detailed.svg")
-    with open(svg_path, 'w', encoding='utf-8') as f:
-        f.write(svg_str)
+def generate_screenshot_03():
+    print("Generating Screenshot 03: TUI Tab 2 LiveData Gauges & Sparklines...")
+    W, H = 1200, 800
+    img = Image.new('RGB', (W, H), '#080b0f')
+    draw = ImageDraw.Draw(img)
 
-    # Convert SVG to High-Res PNG (1800x1100) via rsvg-convert
-    png_engine_diagram = os.path.join(LOCAL_DIR, "screenshot_01_engine_bay_diagram.png")
-    subprocess.run(["rsvg-convert", "-w", "1800", "-h", "1100", svg_path, "-o", png_engine_diagram], check=True)
-    subprocess.run(["cp", png_engine_diagram, os.path.join(ARTIFACTS_DIR, "screenshot_01_engine_bay_diagram.png")], check=True)
-    print(f"[✓] Created: {png_engine_diagram}")
-
-    # --------------------------------------------------------------------------
-    # Screenshot 2: TUI Tab 8 - Engine Bay & Sensors Map
-    # --------------------------------------------------------------------------
-    print("[*] Generating Terminal TUI Screenshot: Tab 8 (Engine Bay & Sensors Map)...")
-    lines_tab8 = [
-        (" 🚗 PSA-DIAG • CITROËN GRAND C4 PICASSO Mk1 (1.6 HDi • EGS6)                 [AEE2004 500k] [MODE: DEMO / TEST DATA]", (0, 229, 255), True),
-        (" 1: DTCs   2: LiveData   3: Sniffer   4: Tools   5: Research   6: Logs   7: Settings   8: Engine ", (0, 229, 255), True),
-        ("─" * 128, (48, 54, 61), False),
-        ("┌─ 1.6 HDi Engine Bay Map ──────────────────────────┐  ┌─ Sensors & Locations (20 Nodes) ───────────────────────────────────┐", (0, 229, 255), True),
-        ("│ [ FRONT BUMPER / RADIATOR PACK ]                  │  │  ID   SENSOR NAME            LIVE VALUE     STATUS    NOMINAL SPEC      │", (201, 209, 217), False),
-        ("│ ┌──────────────────────────────────────────────┐  │  │ ─────────────────────────────────────────────────────────────────── │", (201, 209, 217), False),
-        ("│ │ [03] INTERCOOLER     │ [11] DPF (18.4g soot) │  │  │ ▶[01] Mass Air Flow Sensor   485.0 mg/str   NOMINAL   250-550 mg/stroke │", (0, 230, 118), True),
-        ("│ │  dp: 0.04 bar        │      backp: 8.5 mb    │  │  │  [02] Garrett GT1544V Turbo  1.02 bar       NOMINAL   0.98 - 1.05 bar   │", (201, 209, 217), False),
-        ("│ ├──────────────────────┼───────────────────────┤  │  │  [03] Boost Intercooler      0.04 bar dp    NOMINAL   dp < 0.15 bar     │", (201, 209, 217), False),
-        ("│ │ [04] MAP / IAT       │ [02] GARRETT TURBO    │  │  │  [04] MAP / IAT Sensor       1024 mbar      NOMINAL   1013 mbar atmo    │", (201, 209, 217), False),
-        ("│ │  1024 mb / 17.5°C    │  1.02 bar | [09] 42.5%│  │  │  [05] Bosch CP1H Fuel Pump   38.5 °C        NOMINAL   suction > -0.3b   │", (201, 209, 217), False),
-        ("│ ├──────────────────────┴───────────────────────┤  │  │  [06] High Pressure Rail     298.0 bar      NOMINAL   250 - 1600 bar    │", (201, 209, 217), False),
-        ("│ │ DV6 1.6 HDi CYLINDER HEAD (16V / 8V DIESEL)  │  │  │  [07] Rail Pressure Sensor   295.0 bar      NOMINAL   tracks ±15 bar    │", (201, 209, 217), False),
-        ("│ │ [08] INJ4:+0.1 INJ3:+0.1 INJ2:-0.4 INJ1:+0.2 │  │  │  [08] Injectors 1-4 Balance  +0.20 mg/str   NOMINAL   ±1.5 mg/stroke    │", (201, 209, 217), False),
-        ("│ │ [06] RAIL: 298 bar [05] PUMP:38.5°C [07] SENS│  │  │  [09] Turbo VNT Solenoid     42.5 %         NOMINAL   20% to 85% duty   │", (201, 209, 217), False),
-        ("│ ├──────────────────────┬───────────────────────┤  │  │  [10] Pre-Cat EGT Temp       188.0 °C       NOMINAL   140 - 620 °C      │", (201, 209, 217), False),
-        ("│ │ [01] AIR & MAF       │ [17] EGS6 GEARBOX     │  │  │  [11] DPF (FAP) Particulate  18.4 g         NOMINAL   < 25g (40g limit) │", (201, 209, 217), False),
-        ("│ │  485.0 mg/stroke     │  Selector: Neutral    │  │  │  [12] DPF Diff Pressure      8.5 mbar       NOMINAL   0 - 12 mbar idle  │", (201, 209, 217), False),
-        ("│ │ [15] CRANK: 850 RPM  │  [18] PUMP: 48.2 bar  │  │  │ ┌─ Sensor #01 Technical Details ───────────────────────────────┐ │", (0, 229, 255), True),
-        ("│ │ [16] CAM: SYNCED     │  [19] CLUTCH: 14.8mm  │  │  │ │ Name: Mass Air Flow Sensor (Débitmètre) - 1920.EK            │ │", (255, 255, 255), True),
-        ("│ │ [14] ECT: 86.4°C     │  [20] 12V BATT: 14.28V│  │  │ │ Location: Intake duct between air filter box and turbo inlet│ │", (201, 209, 217), False),
-        ("│ └──────────────────────┴───────────────────────┘  │  │ │ Connector: 4-Pin Black (12V, Ground, Signal 0-5V, IAT)       │ │", (139, 148, 158), False),
-        ("│ [ BULKHEAD / CABIN SCUTTLE ]                      │  │ │ Nominal: 250 - 550 mg/stroke (8-18 g/s at idle; >80 under bst)│ │", (0, 230, 118), False),
-        ("└───────────────────────────────────────────────────┘  │ └──────────────────────────────────────────────────────────────┘ │", (0, 229, 255), True),
-        ("                                                       └───────────────────────────────────────────────────────────────────┘", (0, 229, 255), True),
-        ("─" * 128, (48, 54, 61), False),
-        (" [←/→] Tab   [↑/↓] Select Sensor   [Enter] Inspect Details   [Q] Quit                        [1-8] Tabs   [D] Engine Diagram", (139, 148, 158), False)
+    # Window Frame & Tab bar
+    draw.rectangle([(0, 0), (W, 36)], fill='#161b22')
+    draw.text((16, 10), "PSA-DIAG Terminal Workstation • Real-Time Telemetry & btop Dials", fill='#c9d1d9', font=FONT_HEAD)
+    draw.rectangle([(0, 36), (W, 70)], fill='#0d1117')
+    draw.line([(0, 70), (W, 70)], fill='#30363d', width=1)
+    
+    tabs = [
+        ("1:DTC Scan", False),
+        ("2:LiveData", True),
+        ("3:Actuators", False),
+        ("4:Tools", False),
+        ("5:Telecode", False),
+        ("6:Sniffer", False),
+        ("7:LogPlayer", False),
+        ("8:Engine", False),
+        ("9:Audit", False)
     ]
-    img_tui_engine = render_terminal_window(lines_tab8, title="psa-diag • Tab 8: Engine Bay Sensor Map (Citroën Grand C4 Picasso 1.6 HDi)")
-    png_tui_engine = os.path.join(LOCAL_DIR, "screenshot_02_tui_engine_tab.png")
-    img_tui_engine.save(png_tui_engine)
-    img_tui_engine.save(os.path.join(ARTIFACTS_DIR, "screenshot_02_tui_engine_tab.png"))
-    print(f"[✓] Created: {png_tui_engine}")
+    tx = 16
+    for tname, active in tabs:
+        tw = draw.textlength(tname, font=FONT_MONO) + 20
+        if active:
+            draw.rectangle([(tx, 42), (tx + tw, 70)], fill='#1c2128')
+            draw.line([(tx, 42), (tx + tw, 42)], fill='#00e5ff', width=3)
+            draw.text((tx + 10, 50), tname, fill='#00e5ff', font=FONT_MONO)
+        else:
+            draw.text((tx + 10, 50), tname, fill='#8b949e', font=FONT_MONO)
+        tx += tw + 4
 
-    # --------------------------------------------------------------------------
-    # Screenshot 3: TUI Tab 2 - LiveData Gauges (btop-style)
-    # --------------------------------------------------------------------------
-    print("[*] Generating Terminal TUI Screenshot: Tab 2 (LiveData Gauges)...")
-    lines_livedata = [
-        (" 🚗 PSA-DIAG • CITROËN GRAND C4 PICASSO Mk1 (1.6 HDi • EGS6)                 [AEE2004 500k] [MODE: DEMO / TEST DATA]", (0, 229, 255), True),
-        (" 1: DTCs   2: LiveData   3: Sniffer   4: Tools   5: Research   6: Logs   7: Settings   8: Engine ", (0, 229, 255), True),
-        ("─" * 128, (48, 54, 61), False),
-        ("┌─ Engine & Turbo Powertrain ───────────────────────┐  ┌─ EGS6 Transmission & Hydraulics ─────────────────────────────┐", (0, 229, 255), True),
-        ("│ Engine Speed (RPM):     850 RPM                   │  │ Hydraulic Line Pressure: 48.2 bar  (Pump Cutout: 50.0 bar)     │", (201, 209, 217), False),
-        ("│ [██████░░░░░░░░░░░░░░] 18%  (Idle: 850 RPM)       │  │ [██████████████████░░] 82%  (Nominal: 40 - 50 bar)             │", (0, 230, 118), True),
-        ("│                                                   │  │                                                               │", (201, 209, 217), False),
-        ("│ Turbo Boost Pressure:   1.02 bar (Target: 1.00)   │  │ Accumulator Decay Hold:  185s  [HEALTHY: >120s threshold]     │", (201, 209, 217), False),
-        ("│ [████░░░░░░░░░░░░░░░░] 12%  (Atmospheric / Idle)  │  │ Clutch Slave Position:   14.8 mm                              │", (0, 230, 118), True),
-        ("│                                                   │  │ [████████████░░░░░░░░] 60%  (Wear: ~40% friction remaining)   │", (255, 214, 0), True),
-        ("│ Common Rail Pressure:   298.0 bar (Target: 295.0) │  │ Selected Gearbox State:  1st Gear (Auto Mode)                 │", (201, 209, 217), False),
-        ("│ [███░░░░░░░░░░░░░░░░░] 18%  (Idle Pressure)       │  │ Clutch Slip Speed:       0 RPM  (Flywheel Synced)            │", (0, 230, 118), True),
-        ("│                                                   │  │ Gearbox Oil Temp:        64 °C  (Normal Operating Temp)       │", (201, 209, 217), False),
-        ("│ Engine Coolant Temp:    86.4 °C (Thermostat OK)   │  └───────────────────────────────────────────────────────────────┘", (0, 229, 255), True),
-        ("│ [█████████████░░░░░░░] 68%  (Nominal: 83 - 92 °C) │  ┌─ Odometer & Central Body Gateway (BSI) ────────────────────────┐", (0, 229, 255), True),
-        ("│ 12V Starter Battery:    14.28 V (Alternator OK)   │  │ Total Vehicle Mileage:   114,655 miles (184,520 km)           │", (255, 255, 255), True),
-        ("│ [████████████████████] 95%  (Charging Nominal)    │  │ Next Service Countdown:  870 miles (45 days)                  │", (255, 214, 0), True),
-        ("└───────────────────────────────────────────────────┘  │ Maintenance Spanner:     DUE SOON (Spanner Illuminated)       │", (255, 95, 87), True),
-        ("┌─ DPF Exhaust & Aftertreatment ────────────────────┐  │ Oil Degradation Index:   18% (82% Oil Life Remaining)         │", (201, 209, 217), False),
-        ("│ DPF Particulate Soot:   18.4 g (Capacity: 40.0 g) │  │ Trip A / Economy:        256.3 mi • 52.3 MPG (5.4 L/100km)    │", (201, 209, 217), False),
-        ("│ [█████████░░░░░░░░░░░] 46%  (Soot Load Healthy)   │  │ BSI ↔ Cluster Mileage:   PERFECT SYNC (Zero Tampering Flag)   │", (0, 230, 118), True),
-        ("│ Exhaust Diff Pressure:  8.5 mbar (Idle Flow OK)   │  └───────────────────────────────────────────────────────────────┘", (0, 229, 255), True),
-        ("│ Eolys Additive Pouch:   950 ml / 1100 ml (86.4%)  │                                                                   ", (201, 209, 217), False),
-        ("└───────────────────────────────────────────────────┘                                                                   ", (0, 229, 255), True),
-        ("─" * 128, (48, 54, 61), False),
-        (" [←/→] Tab   [Space] Pause Telemetry   [Q] Quit                                      Auto-refreshing CAN IS bus at 20 Hz", (139, 148, 158), False)
+    # Top Telemetry Status Header (x=16, y=82, w=1168, h=40)
+    draw.rounded_rectangle([(16, 82), (1184, 122)], radius=6, fill='#161b22', outline='#30363d', width=1)
+    draw.text((28, 94), "● LIVE STREAMING", fill='#00e676', font=FONT_MONO_SM)
+    draw.text((180, 94), "Interface: can0 (500 kbps)", fill='#c9d1d9', font=FONT_MONO_SM)
+    draw.text((420, 94), "Frame Rate: 1,842 fps", fill='#00e5ff', font=FONT_MONO_SM)
+    draw.text((640, 94), "Bus Load: 28.4%", fill='#ffd600', font=FONT_MONO_SM)
+    draw.text((820, 94), "Drops: 0", fill='#00e676', font=FONT_MONO_SM)
+    draw.text((950, 94), "[● REC] flight_log.csv", fill='#ff5252', font=FONT_MONO_SM)
+
+    # 1. Primary Dials (Top Row: 2 Big Cards)
+    # Tachometer (Left: w=576)
+    draw.rounded_rectangle([(16, 134), (592, 330)], radius=8, fill='#0d1117', outline='#00e676', width=2)
+    draw.text((32, 148), "ENGINE SPEED (TACHOMETER)", fill='#8b949e', font=FONT_MONO_SM)
+    draw.text((32, 172), "850", fill='#00e676', font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 38))
+    draw.text((140, 192), "RPM (Idle)", fill='#c9d1d9', font=FONT_HEAD)
+    
+    # RPM Sparkline Trend (last 60s)
+    draw.text((32, 235), "60-Second Trend:   ▂ ▂  ▂▂   ▂ ▂  ▂▂   ▂ ▂  ▂▂  ", fill='#00e676', font=FONT_MONO)
+    draw.rectangle([(32, 270), (576, 290)], fill='#161b22')
+    draw.rectangle([(32, 270), (32 + int(544 * (850 / 5000)), 290)], fill='#00e676')
+    draw.text((32, 300), "0 RPM                  Redline: 4,500 RPM                  5,000 RPM", fill='#8b949e', font=FONT_MONO_XS)
+
+    # Common Rail Pressure (Right: w=576)
+    draw.rounded_rectangle([(608, 134), (1184, 330)], radius=8, fill='#0d1117', outline='#ffd600', width=2)
+    draw.text((624, 148), "HIGH-PRESSURE COMMON RAIL (BOSCH CP1H)", fill='#8b949e', font=FONT_MONO_SM)
+    draw.text((624, 172), "298.0", fill='#ffd600', font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 38))
+    draw.text((780, 192), "bar (Target: 295.0 bar • Delta: +3.0)", fill='#c9d1d9', font=FONT_HEAD)
+    
+    # Rail Sparkline Trend
+    draw.text((624, 235), "60-Second Trend:  ▂▃▂  ▂▃▂  ▂▃▂  ▂▃▂  ▂▃▂  ▂▃▂  ", fill='#ffd600', font=FONT_MONO)
+    draw.rectangle([(624, 270), (1168, 290)], fill='#161b22')
+    draw.rectangle([(624, 270), (624 + int(544 * (298 / 1600)), 290)], fill='#ffd600')
+    draw.text((624, 300), "0 bar                  Nominal Idle: 250-300 bar             1,600 bar", fill='#8b949e', font=FONT_MONO_XS)
+
+    # 2. Secondary Dials (Middle Row: 3 Medium Cards)
+    mid_cards = [
+        ("TURBO BOOST PRESSURE", "1.02", "bar", "Target: 1.00 bar", "#ff9100", 1.02, 2.5, " ▂▂▂  ▂▂▂  ▂▂▂  "),
+        ("COOLANT TEMPERATURE", "86.4", "°C", "Thermostat Nominal", "#00e676", 86.4, 120, "▄▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅"),
+        ("MASS AIR FLOW (MAF)", "485.0", "mg", "EGR Tracked: 34%", "#00e5ff", 485.0, 700, " ▃▃▂  ▃▃▂  ▃▃▂  ")
     ]
-    img_tui_live = render_terminal_window(lines_livedata, title="psa-diag • Tab 2: LiveData Telemetry Gauges (Citroën Grand C4 Picasso)")
-    png_tui_live = os.path.join(LOCAL_DIR, "screenshot_03_tui_livedata.png")
-    img_tui_live.save(png_tui_live)
-    img_tui_live.save(os.path.join(ARTIFACTS_DIR, "screenshot_03_tui_livedata.png"))
-    print(f"[✓] Created: {png_tui_live}")
+    mc_w = (1168 - 32) // 3
+    for i, (mtitle, mval, munit, msub, mcol, val_f, max_f, spark) in enumerate(mid_cards):
+        cx = 16 + i * (mc_w + 16)
+        draw.rounded_rectangle([(cx, 346), (cx + mc_w, 530)], radius=6, fill='#0d1117', outline='#30363d', width=1)
+        draw.text((cx + 16, 360), mtitle, fill='#8b949e', font=FONT_MONO_XS)
+        draw.text((cx + 16, 380), mval, fill=mcol, font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 28))
+        draw.text((cx + 110, 392), munit, fill='#c9d1d9', font=FONT_HEAD)
+        draw.text((cx + 16, 422), msub, fill='#8b949e', font=FONT_MONO_XS)
+        
+        # Trend
+        draw.text((cx + 16, 444), f"Trend: {spark}", fill=mcol, font=FONT_MONO_XS)
+        # Bar
+        pct = min(1.0, val_f / max_f)
+        draw.rectangle([(cx + 16, 476), (cx + mc_w - 16, 490)], fill='#161b22')
+        draw.rectangle([(cx + 16, 476), (cx + 16 + int((mc_w - 32) * pct), 490)], fill=mcol)
 
-    # --------------------------------------------------------------------------
-    # Screenshot 4: TUI Tab 1 - Extended Multi-Module DTC Scan
-    # --------------------------------------------------------------------------
-    print("[*] Generating Terminal TUI Screenshot: Tab 1 (Extended DTC Scan)...")
-    lines_dtc = [
-        (" 🚗 PSA-DIAG • CITROËN GRAND C4 PICASSO Mk1 (1.6 HDi • EGS6)                 [AEE2004 500k] [MODE: DEMO / TEST DATA]", (0, 229, 255), True),
-        (" 1: DTCs   2: LiveData   3: Sniffer   4: Tools   5: Research   6: Logs   7: Settings   8: Engine ", (0, 229, 255), True),
-        ("─" * 128, (48, 54, 61), False),
-        (" [S] Run Extended Multi-Module Scan     [R] Read Powertrain     [C] Clear Codes     [F] Freeze-Frame Snapshot ", (0, 229, 255), True),
-        (" Status: Full vehicle CAN scan complete. 3 fault codes detected across 2 electronic modules.", (255, 214, 0), True),
-        ("┌─ Diagnostic Trouble Codes (3 Detected) ───────────┐  ┌─ Selected DTC Technical Analysis & Repair Guidance ────────┐", (0, 229, 255), True),
-        ("│ ▶ P17A5 [EGS6 Gearbox 0x7E9]                      │  │ FAULT CODE: P17A5  (Raw Hex: 0x17A5)                          │", (255, 95, 87), True),
-        ("│   Mechanical or hydraulic gearbox fault 1st gear  │  │ Module:     Piloted Manual Gearbox (BVMP - CFC300P / 0x7E9)   │", (255, 255, 255), False),
-        ("│   Status: CONFIRMED • MIL Service Lamp ON         │  │ OEM (FR):   Défaut mécanique ou hydraulique de boîte de vit.  │", (139, 148, 158), False),
-        ("│                                                   │  │ Severity:   HIGH (Impairs 1st gear pull-away & clutch timing) │", (255, 95, 87), True),
-        ("│   P0299 [Engine EDC16C34 0x7E8]                   │  │                                                               │", (201, 209, 217), False),
-        ("│   Turbocharger pressure signal - Underboost dev.  │  │ FREEZE-FRAME TELEMETRY AT TRIP POINT:                         │", (0, 229, 255), True),
-        ("│   Status: CONFIRMED • Low RPM manifold vacuum     │  │ • Engine Speed:          860 RPM  (Stationary Idle)           │", (201, 209, 217), False),
-        ("│                                                   │  │ • Vehicle Speed:         3 km/h   (Pulling away in 1st gear)  │", (201, 209, 217), False),
-        ("│   P1351 [Engine EDC16C34 0x7E8]                   │  │ • Clutch Actuator:       15.4 mm  (High travel threshold)     │", (201, 209, 217), False),
-        ("│   Pre/post heating relay circuit open/coherence   │  │ • Clutch Slip Speed:     420 RPM  (Synchronization Timeout)   │", (255, 214, 0), False),
-        ("│   Status: PENDING • Extremely common on 1.6 HDi   │  │ • Hydraulic Pressure:    38.2 bar (Dipped below 40 bar limit!)│", (255, 95, 87), True),
-        ("│                                                   │  │ • Battery Voltage:       13.9 V   (Alternator OK)             │", (201, 209, 217), False),
-        ("│                                                   │  │                                                               │", (201, 209, 217), False),
-        ("│                                                   │  │ ENGINEERING REPAIR ADVICE:                                    │", (0, 230, 118), True),
-        ("│                                                   │  │ 1. Hydraulic pressure dipped to 38.2 bar during clutch slip.  │", (201, 209, 217), False),
-        ("│                                                   │  │    The accumulator sphere failed to supply rapid volume.      │", (201, 209, 217), False),
-        ("│                                                   │  │ 2. Run 'psa egs6 relearn --demo' to recalibrate bite point.   │", (0, 229, 255), False),
-        ("└───────────────────────────────────────────────────┘  └───────────────────────────────────────────────────────────────┘", (0, 229, 255), True),
-        ("─" * 128, (48, 54, 61), False),
-        (" [↑/↓] Select Fault Code   [Enter/F] Toggle Freeze-Frame   [C] Clear DTCs   [Q] Quit", (139, 148, 158), False)
+    # 3. Tertiary Auxiliary Telemetry Strip (Bottom Row: 4 Small Cards)
+    aux_cards = [
+        ("BATTERY CHARGE", "14.28 V", "Alternator Output OK", "#00e676"),
+        ("FUEL TANK LEVEL", "72.4 %", "Remaining: ~43 Litres", "#00e5ff"),
+        ("INTAKE AIR TEMP", "24.0 °C", "Ambient: 17.5 °C", "#00e5ff"),
+        ("EGS6 CLUTCH WEAR", "14.8 mm", "Bite Point Stroke", "#ffd600"),
     ]
-    img_tui_dtc = render_terminal_window(lines_dtc, title="psa-diag • Tab 1: Extended Multi-Module DTC Diagnostics")
-    png_tui_dtc = os.path.join(LOCAL_DIR, "screenshot_04_tui_dtc_scan.png")
-    img_tui_dtc.save(png_tui_dtc)
-    img_tui_dtc.save(os.path.join(ARTIFACTS_DIR, "screenshot_04_tui_dtc_scan.png"))
-    print(f"[✓] Created: {png_tui_dtc}")
+    ac_w = (1168 - 48) // 4
+    for i, (atitle, aval, asub, acol) in enumerate(aux_cards):
+        cx = 16 + i * (ac_w + 16)
+        draw.rounded_rectangle([(cx, 546), (cx + ac_w, 646)], radius=6, fill='#11161d', outline='#30363d', width=1)
+        draw.text((cx + 14, 558), atitle, fill='#8b949e', font=FONT_MONO_XS)
+        draw.text((cx + 14, 578), aval, fill=acol, font=FONT_HEAD)
+        draw.text((cx + 14, 608), asub, fill='#8b949e', font=FONT_MONO_XS)
 
-    # --------------------------------------------------------------------------
-    # Screenshot 5: Connection Wizard & Adapter Link Screen
-    # --------------------------------------------------------------------------
-    print("[*] Generating Terminal TUI Screenshot: Connection Wizard...")
-    lines_connect = [
-        (" 🚗 PSA-DIAG • VEHICLE INTERFACE CONNECTION & LOADING WIZARD                 [AEE2004 High-Speed CAN 500k] ", (0, 229, 255), True),
-        (" Citroën Grand C4 Picasso Mk1 (1.6 HDi DV6 • 6-Speed EGS6 / BMP6 • Magneti Marelli CFC300P)", (139, 148, 158), False),
-        ("─" * 128, (48, 54, 61), False),
-        ("", (0, 0, 0), False),
-        ("          ┌─ Connect to Vehicle Interface ────────────────────────────────────────────────────────┐", (0, 229, 255), True),
-        ("          │                                                                                       │", (201, 209, 217), False),
-        ("          │   ⠹ [STATUS: SCANNING HARDWARE COMMUNICATION INTERFACES]                              │", (255, 214, 0), True),
-        ("          │   Probing Linux SocketCAN (can0 / vcan0) & Serial Ports (/dev/ttyUSB*)...             │", (201, 209, 217), False),
-        ("          │                                                                                       │", (201, 209, 217), False),
-        ("          │   AVAILABLE INTERFACES:                                                               │", (255, 255, 255), True),
-        ("          │   ▶ [1] vcan0            (Linux Virtual SocketCAN Interface • 500 kbps Active)        │", (0, 230, 118), True),
-        ("          │     [2] /dev/ttyUSB0     (ELM327 / OBDLink USB Interface • FTDI Serial)               │", (201, 209, 217), False),
-        ("          │     [3] /dev/rfcomm0     (Bluetooth Wireless OBD-II Adapter)                          │", (201, 209, 217), False),
-        ("          │                                                                                       │", (201, 209, 217), False),
-        ("          │   Target Baud Rate: 38,400 baud  |  Protocol: ISO 15765-4 (CAN 11-bit / 500 kbps)     │", (139, 148, 158), False),
-        ("          │                                                                                       │", (201, 209, 217), False),
-        ("          │   VEHICLE CONNECTION INSTRUCTIONS:                                                    │", (0, 229, 255), True),
-        ("          │   • Plug 16-pin OBD diagnostic plug into Citroën cabin fuse box (below steering).     │", (201, 209, 217), False),
-        ("          │   • Turn ignition key to Position 2 (Contact ON - Dashboard illuminated).             │", (201, 209, 217), False),
-        ("          │   • Press [Enter] to link selected interface, or press [D] for Offline Demo Mode.    │", (255, 214, 0), False),
-        ("          │                                                                                       │", (201, 209, 217), False),
-        ("          │   [Enter] Connect Selected   [R] Rescan Ports   [B] Change Baud   [D] Enter Demo Mode │", (0, 229, 255), True),
-        ("          │                                                                                       │", (201, 209, 217), False),
-        ("          └───────────────────────────────────────────────────────────────────────────────────────┘", (0, 229, 255), True),
-        ("", (0, 0, 0), False),
-        ("─" * 128, (48, 54, 61), False),
-        (" Press [D] or [Enter] to enter diagnostic dashboard                                          [Q] Quit", (139, 148, 158), False)
+    # Bottom Flight Recorder Banner
+    draw.rounded_rectangle([(16, 662), (1184, 746)], radius=6, fill='#161b22', outline='#21262d', width=1)
+    draw.text((32, 678), "FLIGHT DATA RECORDER ACTIVE", fill='#ffffff', font=FONT_HEAD)
+    draw.text((32, 702), "Recording PID 0x010C, 0x010B, 0x0105, 0x0110 to /root/psa_diag/recordings/flight_log_20261031.csv", fill='#8b949e', font=FONT_MONO_SM)
+    draw.text((920, 690), "[R] Stop Recording", fill='#ff5252', font=FONT_MONO_SM)
+
+    # Bottom Nav
+    draw.rectangle([(0, 760), (W, 800)], fill='#161b22')
+    draw.text((16, 772), "[SPACE] Pause Stream  [R] Toggle Recording  [G] Graph Detail  [1-9] Switch Tab  [Q] Exit", fill='#c9d1d9', font=FONT_MONO_SM)
+
+    out_path = os.path.join(OUTPUT_DIR, "screenshot_03_tui_livedata.png")
+    art_path = os.path.join(ARTIFACT_DIR, "screenshot_03_tui_livedata.png")
+    img.save(out_path)
+    img.save(art_path)
+    print(f"Screenshot 03 saved successfully ({os.path.getsize(out_path)} bytes)")
+
+# ==============================================================================
+# 4. SCREENSHOT 04: TUI TAB 1 - MULTI-MODULE DTC SCAN & FREEZE FRAME
+# ==============================================================================
+
+def generate_screenshot_04():
+    print("Generating Screenshot 04: TUI Tab 1 Multi-Module DTC Scan & Freeze Frame...")
+    W, H = 1200, 800
+    img = Image.new('RGB', (W, H), '#080b0f')
+    draw = ImageDraw.Draw(img)
+
+    # Window & Tab bar
+    draw.rectangle([(0, 0), (W, 36)], fill='#161b22')
+    draw.text((16, 10), "PSA-DIAG Terminal Workstation • Multi-Module Extended DTC Scanner", fill='#c9d1d9', font=FONT_HEAD)
+    draw.rectangle([(0, 36), (W, 70)], fill='#0d1117')
+    draw.line([(0, 70), (W, 70)], fill='#30363d', width=1)
+    
+    tabs = [
+        ("1:DTC Scan", True),
+        ("2:LiveData", False),
+        ("3:Actuators", False),
+        ("4:Tools", False),
+        ("5:Telecode", False),
+        ("6:Sniffer", False),
+        ("7:LogPlayer", False),
+        ("8:Engine", False),
+        ("9:Audit", False)
     ]
-    img_connect = render_terminal_window(lines_connect, title="psa-diag • Vehicle Interface Connection Wizard")
-    png_connect = os.path.join(LOCAL_DIR, "screenshot_05_connection_wizard.png")
-    img_connect.save(png_connect)
-    img_connect.save(os.path.join(ARTIFACTS_DIR, "screenshot_05_connection_wizard.png"))
-    print(f"[✓] Created: {png_connect}")
+    tx = 16
+    for tname, active in tabs:
+        tw = draw.textlength(tname, font=FONT_MONO) + 20
+        if active:
+            draw.rectangle([(tx, 42), (tx + tw, 70)], fill='#1c2128')
+            draw.line([(tx, 42), (tx + tw, 42)], fill='#00e5ff', width=3)
+            draw.text((tx + 10, 50), tname, fill='#00e5ff', font=FONT_MONO)
+        else:
+            draw.text((tx + 10, 50), tname, fill='#8b949e', font=FONT_MONO)
+        tx += tw + 4
 
-    # --------------------------------------------------------------------------
-    # Screenshot 6: Pre-Purchase Inspection (PPI) Health Scorecard
-    # --------------------------------------------------------------------------
-    print("[*] Generating Terminal Screenshot: Pre-Purchase Inspection Health Scorecard...")
-    lines_health = [
-        (" 🚗 PSA-DIAG • PRE-PURCHASE INSPECTION & 10-POINT VEHICLE HEALTH AUDIT        [AUDIT REPORT: A+]", (0, 229, 255), True),
-        (" Target Vehicle: 2010 Citroën Grand C4 Picasso Mk1 (B58) 1.6 HDi EGS6 • VIN: VF7UA9HZH9J123456", (139, 148, 158), False),
-        (" Recorded Mileage: 114,655 miles (184,520 km)  |  Audit Date: 2026-10-31 11:20:00", (201, 209, 217), False),
-        ("─" * 128, (48, 54, 61), False),
-        ("   OVERALL VEHICLE HEALTH INDEX:  97 / 100    GRADE: A (EXCELLENT / RECOMMENDED PURCHASE)", (0, 230, 118), True),
-        ("   =======================================================================================", (0, 230, 118), True),
-        ("   ITEMIZED 10-POINT SUBSYSTEM INSPECTION CHECKLIST:", (0, 229, 255), True),
-        ("   [PASS] 100/100 : Mileage & Odometer Sync           • 114,655 mi | BSI ↔ Cluster: PERFECT SYNC (No tampering flag)", (0, 230, 118), False),
-        ("   [PASS] 100/100 : EGS6 Semi-Auto Transmission       • Pressure: 48.2 bar | Accumulator: 185s | Clutch wear: 60%", (0, 230, 118), False),
-        ("   [PASS] 100/100 : DPF Filter & Eolys Additive       • Soot: 18.4g (46%) | Eolys reserve: 950 ml (~47,500 km range)", (0, 230, 118), False),
-        ("   [PASS] 100/100 : 12V Battery & Cranking Health     • Resting: 12.55V | Crank Min: 10.85V (>10.5V OK, zero phantom DTCs)", (0, 230, 118), False),
-        ("   [PASS] 100/100 : Electric Parking Brake (EPB)      • Tension: 165 daN (Nominal: 140-180 daN) | Stroke law calibrated", (0, 230, 118), False),
-        ("   [PASS]  95/100 : Dynamic Stability (ABS/ESP 8.1)   • All 4 wheel speed sensors plausible | Zero wheel slip codes", (0, 230, 118), False),
-        ("   [PASS]  92/100 : Engine Boost & Thermal Regulation • Boost pressure tracks target (1.02b) | Thermostat 86.4°C nominal", (0, 230, 118), False),
-        ("   [PASS] 100/100 : Pneumatic Rear Suspension         • Left: 118.2mm | Right: 117.8mm | Bellows leak rate: <0.05 bar/hr", (0, 230, 118), False),
-        ("   [PASS]  90/100 : Multiplex CAN Bus Network         • 9 active nodes responding | No bus-off frame dropouts", (0, 230, 118), False),
-        ("   [WARN]  80/100 : Diagnostic Trouble Codes (DTC)    • Minor glow plug relay code P1351 (common DV6) • No limp mode active", (255, 214, 0), False),
-        ("   ---------------------------------------------------------------------------------------", (48, 54, 61), False),
-        ("   AUDIT SUMMARY & BUYER VERDICT:", (255, 255, 255), True),
-        ("   This Citroën Grand C4 Picasso is in EXCELLENT mechanical and electronic condition. The high-risk", (201, 209, 217), False),
-        ("   points (EGS6 clutch bite-point, hydraulic accumulator, pneumatic rear airbags, DPF soot saturation,", (201, 209, 217), False),
-        ("   and odometer dual-node sync) all test fully within manufacturer nominal specifications.", (201, 209, 217), False),
-        ("   HTML Report exported to: /root/psa_diag/c4_picasso_ppi_report.html", (0, 229, 255), True),
-        ("─" * 128, (48, 54, 61), False),
-        (" Run 'psa health --export report.html --demo' to generate printable customer report            [Q] Quit", (139, 148, 158), False)
+    # Top Scan Summary Bar
+    draw.rounded_rectangle([(16, 82), (1184, 126)], radius=6, fill='#161b22', outline='#30363d', width=1)
+    draw.text((32, 92), "ECU TOPOLOGY SCAN COMPLETE", fill='#00e5ff', font=FONT_HEAD)
+    draw.text((32, 108), "8 Modules Interrogated • 3 Stored Fault Codes Found • Reverse-Engineered PSA Cache: 40,752 Entries", fill='#8b949e', font=FONT_MONO_SM)
+    draw.text((950, 96), "[C] Clear All DTCs", fill='#ff5252', font=FONT_MONO_SM)
+
+    # DTC Fault Listing Table (x=16, y=138, w=1168, h=250)
+    draw.rounded_rectangle([(16, 138), (1184, 388)], radius=6, fill='#0d1117', outline='#30363d', width=1)
+    draw.rectangle([(16, 138), (1184, 168)], fill='#161b22')
+    draw.text((28, 148), "CODE      ECU MODULE      FAULT CLASSIFICATION & DESCRIPTOR                              STATUS         MIL", fill='#8b949e', font=FONT_MONO_XS)
+
+    dtcs = [
+        ("P0299", "EDC16 (0x7E0)", "Pression de suralimentation trop basse (Turbo Underboost Detected)", "Défaut Permanent", "ON", "#ff5252", True),
+        ("P1351", "EDC16 (0x7E0)", "Circuit relais préchauffage - Bougies d'allumage non alimentées", "Défaut Fugitif", "OFF", "#ffd600", False),
+        ("P0562", "BSI (0x752)", "Tension d'alimentation réseau de bord basse (< 11.4V)", "Défaut Fugitif", "OFF", "#ffd600", False),
     ]
-    img_health = render_terminal_window(lines_health, title="psa health • Pre-Purchase Inspection & Vehicle Health Audit")
-    png_health = os.path.join(LOCAL_DIR, "screenshot_06_health_scorecard.png")
-    img_health.save(png_health)
-    img_health.save(os.path.join(ARTIFACTS_DIR, "screenshot_06_health_scorecard.png"))
-    print(f"[✓] Created: {png_health}")
+    dy = 176
+    for code, ecu, desc, ftype, mil, col, selected in dtcs:
+        if selected:
+            draw.rectangle([(18, dy - 4), (1182, dy + 28)], fill='#1c2128', outline='#00e5ff', width=1)
+        draw.text((28, dy), code, fill=col, font=FONT_HEAD)
+        draw.text((120, dy + 2), ecu, fill='#c9d1d9', font=FONT_MONO_SM)
+        draw.text((260, dy + 2), desc[:58], fill='#ffffff', font=FONT_TEXT_BOLD)
+        draw.text((800, dy + 2), ftype, fill=col, font=FONT_MONO_SM)
+        draw.text((970, dy + 2), mil, fill='#ff5252' if mil == "ON" else '#8b949e', font=FONT_MONO_SM)
+        dy += 36
 
-    print("[✓] All 6 screenshots successfully rendered and saved to both local directory and artifacts directory!")
+    # Bottom Area: Deep PSA Freeze-Frame Environmental Conditions (x=16, y=400, w=1168, h=340)
+    draw.rounded_rectangle([(16, 400), (1184, 746)], radius=6, fill='#0d1117', outline='#00e5ff', width=2)
+    draw.rectangle([(16, 400), (1184, 434)], fill='#161b22')
+    draw.text((28, 412), "FREEZE-FRAME ENVIRONMENTAL CONDITIONS • P0299 (EDC16 ENGINE ECU)", fill='#00e5ff', font=FONT_HEAD)
+
+    # Freeze-frame telemetry metrics
+    ff_items = [
+        ("Odometer at Fault:", "142,518 km", "Distance Since First Occurrence:", "14 km"),
+        ("Vehicle Speed:", "74 km/h", "Engine Operating Time:", "3,412 Hours"),
+        ("Engine Speed (RPM):", "2,150 RPM", "Calculated Engine Load:", "68.4 %"),
+        ("Turbo Boost (Actual):", "1.18 bar", "Turbo Boost (Target):", "1.85 bar [DIFF -0.67]"),
+        ("Common Rail Pressure:", "840 bar", "Rail Pressure Target:", "845 bar [OK]"),
+        ("Coolant Temperature:", "84.0 °C", "Intake Air Temperature:", "22.0 °C"),
+        ("Main Injection Quantity:", "24.8 mg/cp", "VNT Solenoid Duty Cycle:", "82.5 % [Max Spool]"),
+        ("Battery Voltage:", "13.92 V", "Fault Frequency Counter:", "12 occurrences")
+    ]
+    fy = 446
+    for lbl1, val1, lbl2, val2 in ff_items:
+        draw.text((36, fy), lbl1, fill='#8b949e', font=FONT_MONO_SM)
+        draw.text((260, fy), val1, fill='#ffffff', font=FONT_HEAD)
+        draw.text((620, fy), lbl2, fill='#8b949e', font=FONT_MONO_SM)
+        draw.text((910, fy), val2, fill='#ffd600' if 'DIFF' in val2 else '#00e676', font=FONT_HEAD)
+        fy += 34
+
+    # Bottom Nav
+    draw.rectangle([(0, 760), (W, 800)], fill='#161b22')
+    draw.text((16, 772), "[▲/▼] Select Fault Code  [F] View Raw Hex Dump  [C] Clear DTCs  [1-9] Switch Tab  [Q] Exit", fill='#c9d1d9', font=FONT_MONO_SM)
+
+    out_path = os.path.join(OUTPUT_DIR, "screenshot_04_tui_dtc_scan.png")
+    art_path = os.path.join(ARTIFACT_DIR, "screenshot_04_tui_dtc_scan.png")
+    img.save(out_path)
+    img.save(art_path)
+    print(f"Screenshot 04 saved successfully ({os.path.getsize(out_path)} bytes)")
+
+# ==============================================================================
+# 5. SCREENSHOT 05: CONNECTION WIZARD & OBD PHYSICAL PINOUT DIAGNOSTICS
+# ==============================================================================
+
+def generate_screenshot_05():
+    print("Generating Screenshot 05: Connection Wizard & Hardware Detection...")
+    W, H = 1200, 800
+    img = Image.new('RGB', (W, H), '#080b0f')
+    draw = ImageDraw.Draw(img)
+
+    # Window
+    draw.rectangle([(0, 0), (W, 36)], fill='#161b22')
+    draw.text((16, 10), "PSA-DIAG • Hardware Interface Link & Physical Bus Diagnostic Wizard", fill='#c9d1d9', font=FONT_HEAD)
+
+    # Main Wizard Container (x=160, y=80, w=880, h=650)
+    wx, wy, ww, wh = 160, 80, 880, 650
+    draw.rounded_rectangle([(wx, wy), (wx + ww, wy + wh)], radius=8, fill='#0d1117', outline='#00e5ff', width=2)
+    
+    # Wizard Title
+    draw.rectangle([(wx, wy), (wx + ww, wy + 50)], fill='#161b22')
+    draw.text((wx + 24, wy + 16), "AUTOMOTIVE HARDWARE INTERFACE DETECTION", fill='#00e5ff', font=FONT_HEAD)
+
+    # 1. Adapter Details Box
+    draw.rounded_rectangle([(wx + 24, wy + 68), (wx + ww - 24, wy + 180)], radius=6, fill='#161b22', outline='#30363d', width=1)
+    draw.text((wx + 40, wy + 82), "DEVICE LINK STATUS: CONNECTED & ONLINE", fill='#00e676', font=FONT_HEAD)
+    
+    dev_specs = [
+        ("Hardware Port:", "/dev/ttyUSB0 (FTDI FT232R USB-Serial Bridge)"),
+        ("Adapter Model:", "OBDLink SX USB (STN1170 Chipset • Firmware v4.2.1)"),
+        ("Baud Rate:", "Auto-Negotiated: 115,200 bps (Buffer: 2,048 Bytes)"),
+        ("Bus Protocol:", "ISO 15765-4 CAN (11-bit ID • 500 kbps Baud)")
+    ]
+    sy = wy + 104
+    for dlabel, dval in dev_specs:
+        draw.text((wx + 40, sy), dlabel, fill='#8b949e', font=FONT_MONO_SM)
+        draw.text((wx + 180, sy), dval, fill='#ffffff', font=FONT_MONO_SM)
+        sy += 18
+
+    # 2. OBD-II 16-Pin Physical Bus Layer Health
+    draw.rounded_rectangle([(wx + 24, wy + 196), (wx + ww - 24, wy + 370)], radius=6, fill='#11161d', outline='#30363d', width=1)
+    draw.text((wx + 40, wy + 210), "OBD-II 16-PIN PHYSICAL ELECTRICAL HEALTH", fill='#00e5ff', font=FONT_HEAD)
+
+    pins = [
+        ("PIN 16 (+12V Unswitched Battery Power):", "12.45 V", "PASS (Nominal 12.0 - 12.8V)", "#00e676"),
+        ("PIN 04/05 (Chassis & Signal Ground):", "< 0.04 Ω", "PASS (Good Ground Loop)", "#00e676"),
+        ("PIN 06/14 (CAN-H / CAN-L Termination):", "60.2 Ω", "PASS (Dual 120Ω in parallel)", "#00e676"),
+        ("PIN 07 (K-Line Comfort Bus):", "11.80 V", "READY (ISO 9141-2 / KWP2000)", "#00e676"),
+        ("PIN 06 (CAN-H Recessive / Dominant):", "2.48V / 3.48V", "PASS (Differential Spacing 2.0V)", "#00e676"),
+    ]
+    py = wy + 236
+    for plbl, pval, pstat, pcol in pins:
+        draw.text((wx + 40, py), plbl, fill='#c9d1d9', font=FONT_MONO_SM)
+        draw.text((wx + 460, py), pval, fill='#ffffff', font=FONT_HEAD)
+        draw.text((wx + 580, py), pstat, fill=pcol, font=FONT_MONO_SM)
+        py += 24
+
+    # 3. Vehicle ECU Broadcast Detection
+    draw.rounded_rectangle([(wx + 24, wy + 386), (wx + ww - 24, wy + 560)], radius=6, fill='#161b22', outline='#30363d', width=1)
+    draw.text((wx + 40, wy + 400), "INITIAL VEHICLE ECU HANDSHAKE & LATENCY", fill='#00e5ff', font=FONT_HEAD)
+
+    ecus = [
+        ("BSI 2004 Body Computer", "0x752 (Rx: 0x75A)", "14 ms", "ONLINE", "#00e676"),
+        ("Bosch EDC16C34 Engine ECU", "0x7E0 (Rx: 0x7E8)", "18 ms", "ONLINE", "#00e676"),
+        ("Magneti Marelli EGS6 Gearbox", "0x7E2 (Rx: 0x7EA)", "16 ms", "ONLINE", "#00e676"),
+        ("Bosch ESP 8.1 Stability/ABS", "0x760 (Rx: 0x768)", "19 ms", "ONLINE", "#00e676"),
+        ("CAAR Pneumatic Air Suspension", "0x770 (Rx: 0x778)", "22 ms", "ONLINE", "#00e676"),
+    ]
+    ey = wy + 426
+    for ename, canid, lat, estatus, ecol in ecus:
+        draw.text((wx + 40, ey), ename, fill='#ffffff', font=FONT_TEXT_BOLD)
+        draw.text((wx + 340, ey), canid, fill='#8b949e', font=FONT_MONO_SM)
+        draw.text((wx + 560, ey), lat, fill='#c9d1d9', font=FONT_MONO_SM)
+        draw.text((wx + 680, ey), estatus, fill=ecol, font=FONT_MONO_SM)
+        ey += 24
+
+    # Action Button
+    draw.rounded_rectangle([(wx + 240, wy + 580), (wx + 640, wy + 626)], radius=6, fill='#00e5ff')
+    draw.text((wx + 320, wy + 594), "LAUNCH WORKSTATION [ENTER]", fill='#080b0f', font=FONT_HEAD)
+
+    out_path = os.path.join(OUTPUT_DIR, "screenshot_05_connection_wizard.png")
+    art_path = os.path.join(ARTIFACT_DIR, "screenshot_05_connection_wizard.png")
+    img.save(out_path)
+    img.save(art_path)
+    print(f"Screenshot 05 saved successfully ({os.path.getsize(out_path)} bytes)")
+
+# ==============================================================================
+# 6. SCREENSHOT 06: REALISTIC 82/100 PRE-PURCHASE INSPECTION SCORECARD
+# ==============================================================================
+
+def generate_screenshot_06():
+    print("Generating Screenshot 06: Realistic Pre-Purchase Inspection (PPI) Scorecard...")
+    W, H = 1200, 800
+    img = Image.new('RGB', (W, H), '#080b0f')
+    draw = ImageDraw.Draw(img)
+
+    # Window
+    draw.rectangle([(0, 0), (W, 36)], fill='#161b22')
+    draw.text((16, 10), "PSA-DIAG • Pre-Purchase Vehicle Reliability & Health Audit Report", fill='#c9d1d9', font=FONT_HEAD)
+
+    # Report Container (x=100, y=60, w=1000, h=710)
+    cx, cy, cw, ch = 100, 60, 1000, 710
+    draw.rounded_rectangle([(cx, cy), (cx + cw, cy + ch)], radius=8, fill='#0d1117', outline='#30363d', width=1)
+    
+    # Header Banner
+    draw.rectangle([(cx, cy), (cx + cw, cy + 60)], fill='#161b22')
+    draw.text((cx + 24, cy + 14), "VEHICLE HEALTH AUDIT & PRE-PURCHASE INSPECTION", fill='#00e5ff', font=FONT_TITLE)
+    draw.text((cx + 24, cy + 38), "2010 Citroën Grand C4 Picasso Mk1 (B58) • 1.6 HDi DV6TED4 • 142,518 km", fill='#8b949e', font=FONT_MONO_SM)
+
+    # Big Score Card Box (x=cx+24, y=cy+74, w=cw-48, h=86)
+    draw.rounded_rectangle([(cx + 24, cy + 74), (cx + cw - 24, cy + 160)], radius=6, fill='#11161d', outline='#ffd600', width=2)
+    draw.text((cx + 44, cy + 86), "OVERALL RELIABILITY SCORE:", fill='#8b949e', font=FONT_MONO_SM)
+    draw.text((cx + 44, cy + 104), "82 / 100", fill='#ffd600', font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf', 38))
+    draw.text((cx + 240, cy + 116), "GRADE: B+ (GOOD ROADWORTHY CONDITION • MINOR ADVISORIES)", fill='#ffffff', font=FONT_HEAD)
+
+    # 10-Point Audit Inspection Table
+    draw.rectangle([(cx + 24, cy + 174), (cx + cw - 24, cy + 200)], fill='#161b22')
+    draw.text((cx + 36, cy + 182), "#  SUBSYSTEM INSPECTION ITEM       SCORE   STATUS      WORKSHOP AUDIT FINDING & RECOMMENDATION", fill='#8b949e', font=FONT_MONO_XS)
+
+    audit_items = [
+        ("1", "Common Rail Fuel Injection", "10/10", "PASS", "Rail pressure strictly tracks target (298 bar idle / ±3 bar)", "#00e676"),
+        ("2", "Turbocharger & Boost Control", "9/10", "PASS", "Spool latency 0.32s; minor vane soot, actuator duty cycle 42%", "#00e676"),
+        ("3", "DPF Filter & Eolys Additive", "7/10", "ADVISORY", "Additive pouch volume at 420 ml; refill recommended within 5k km", "#ffd600"),
+        ("4", "EGS6 Automated Transmission", "8/10", "PASS", "Clutch travel 14.8mm (nominal wear); hydraulic accumulator 48 bar", "#00e676"),
+        ("5", "Rear Pneumatic Air Suspension", "7/10", "ADVISORY", "Compressor run time 14s; slight height drift; check rubber bellows", "#ffd600"),
+        ("6", "Injector Seal Integrity (Blow-by)", "8/10", "ADVISORY", "Cyl 2 injector copper seal shows early carbon misting; retorque", "#ffd600"),
+        ("7", "Braking & Electric Handbrake (FSE)", "10/10", "PASS", "Braking balance nominal; FSE motor release time 0.8s", "#00e676"),
+        ("8", "Electrical, Battery & BSM Module", "9/10", "PASS", "Alternator charging at 14.28V; battery resting 12.45V", "#00e676"),
+        ("9", "Engine Cooling & Thermostat", "10/10", "PASS", "Coolant 86.4 °C; thermostat opening confirmed at 83 °C", "#00e676"),
+        ("10", "Odometer Tampering Verification", "10/10", "PASS", "Odometer verified across BSI, EDC16, and EGS6 (142,518 km)", "#00e676"),
+    ]
+    ay = cy + 208
+    for num, item, sc, st, note, col in audit_items:
+        draw.text((cx + 36, ay), f"{num:<2} {item:<30}", fill='#ffffff', font=FONT_TEXT_BOLD)
+        draw.text((cx + 320, ay), sc, fill=col, font=FONT_MONO_SM)
+        draw.text((cx + 390, ay), st, fill=col, font=FONT_MONO_SM)
+        draw.text((cx + 480, ay), note[:52], fill='#8b949e', font=FONT_MONO_XS)
+        ay += 42
+
+    # Bottom Actions & Export
+    draw.rounded_rectangle([(cx + 24, cy + ch - 64), (cx + cw - 24, cy + ch - 16)], radius=6, fill='#161b22', outline='#30363d', width=1)
+    draw.text((cx + 44, cy + ch - 48), "HTML Inspection Report exported to: /root/psa_diag/c4_picasso_ppi_report.html", fill='#00e5ff', font=FONT_MONO_SM)
+    draw.text((cx + cw - 220, cy + ch - 48), "[P] Print / Export PDF", fill='#ffffff', font=FONT_HEAD)
+
+    out_path = os.path.join(OUTPUT_DIR, "screenshot_06_health_scorecard.png")
+    art_path = os.path.join(ARTIFACT_DIR, "screenshot_06_health_scorecard.png")
+    img.save(out_path)
+    img.save(art_path)
+    print(f"Screenshot 06 saved successfully ({os.path.getsize(out_path)} bytes)")
 
 if __name__ == '__main__':
-    generate_all()
+    generate_screenshot_01()
+    generate_screenshot_02()
+    generate_screenshot_03()
+    generate_screenshot_04()
+    generate_screenshot_05()
+    generate_screenshot_06()
+    print("All 6 screenshots successfully regenerated with high fidelity!")
