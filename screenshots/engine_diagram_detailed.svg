@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1100" viewBox="0 0 1800 1100">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080b0f"/>
+      <stop offset="50%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="engineBlock" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1c2128"/>
+      <stop offset="50%" stop-color="#21262d"/>
+      <stop offset="100%" stop-color="#1c2128"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1800" height="1100" fill="url(#bgGrad)"/>
+
+  <!-- Top Title Banner -->
+  <rect x="25" y="20" width="1750" height="70" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+  <text x="50" y="52" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="bold" fill="#00e5ff" letter-spacing="1">🚗 CITROËN GRAND C4 PICASSO Mk1 (B58) • 1.6 HDi DV6 DIESEL</text>
+  <text x="50" y="74" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" fill="#8b949e">ENGINE BAY ARCHITECTURE &amp; SENSOR LOCATION MAP • 6-SPEED EGS6 PILOTED MANUAL TRANSMISSION (CFC300P)</text>
+  <rect x="1560" y="36" width="190" height="36" rx="6" fill="rgba(0,229,255,0.15)" stroke="#00e5ff" stroke-width="1"/>
+  <text x="1655" y="60" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e5ff" text-anchor="middle">AEE2004 500kbps CAN</text>
+
+  <!-- LEFT PANE: ENGINE BAY SCHEMATIC (Width: 1100) -->
+  <g transform="translate(25, 110)">
+    <!-- Engine Bay Outer Chassis Perimeter -->
+    <rect x="0" y="0" width="1090" height="960" rx="16" fill="#0d1117" stroke="#30363d" stroke-width="2"/>
+    
+    <!-- Top & Bottom Boundaries -->
+    <rect x="20" y="20" width="1050" height="38" rx="6" fill="#161b22" stroke="#21262d"/>
+    <text x="545" y="44" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#484f58" text-anchor="middle" letter-spacing="2">FRONT BUMPER / RADIATOR PACK / CRASH STRUCTURE</text>
+
+    <rect x="20" y="900" width="1050" height="38" rx="6" fill="#161b22" stroke="#21262d"/>
+    <text x="545" y="924" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#484f58" text-anchor="middle" letter-spacing="2">CABIN BULKHEAD / SCUTTLE TRAY / BRAKE SERVO</text>
+
+    <!-- Airflow Piping (Cold side Cyan, Hot side Orange) -->
+    <!-- Intercooler to MAP pipe -->
+    <path d="M 320 195 L 320 280 L 290 280" fill="none" stroke="#00e5ff" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+    <!-- Turbo to Intercooler pipe -->
+    <path d="M 750 260 L 750 160 L 400 160" fill="none" stroke="#ff9100" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+    <!-- Exhaust to DPF pipe -->
+    <path d="M 830 290 L 960 290 L 960 440" fill="none" stroke="#ff1744" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+    <!-- Fuel Rail High Pressure line -->
+    <path d="M 240 480 L 430 480 L 430 470 L 600 470" fill="none" stroke="#ffd600" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+
+    <!-- Aluminium Cylinder Head Casting -->
+    <rect x="200" y="350" width="620" height="190" rx="14" fill="url(#engineBlock)" stroke="#00e5ff" stroke-width="2" opacity="0.9"/>
+    <text x="510" y="375" font-family="'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="bold" fill="#00e5ff" text-anchor="middle" letter-spacing="2">DV6 1.6 HDi 16V / 8V DIESEL CYLINDER HEAD</text>
+    <text x="230" y="525" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#8b949e">TIMING BELT (LEFT)</text>
+    <text x="790" y="525" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" fill="#8b949e" text-anchor="end">FLYWHEEL / GEARBOX (RIGHT)</text>
+
+    <!-- Cylinders 4, 3, 2, 1 -->
+    <g transform="translate(250, 410)">
+      <!-- Cyl 4 -->
+      <circle cx="80" cy="50" r="30" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+      <text x="80" y="55" font-family="monospace" font-size="13" font-weight="bold" fill="#c9d1d9" text-anchor="middle">CYL 4</text>
+      <!-- Cyl 3 -->
+      <circle cx="210" cy="50" r="30" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+      <text x="210" y="55" font-family="monospace" font-size="13" font-weight="bold" fill="#c9d1d9" text-anchor="middle">CYL 3</text>
+      <!-- Cyl 2 -->
+      <circle cx="340" cy="50" r="30" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+      <text x="340" y="55" font-family="monospace" font-size="13" font-weight="bold" fill="#c9d1d9" text-anchor="middle">CYL 2</text>
+      <!-- Cyl 1 -->
+      <circle cx="470" cy="50" r="30" fill="#161b22" stroke="#00e5ff" stroke-width="2.5"/>
+      <text x="470" y="55" font-family="monospace" font-size="13" font-weight="bold" fill="#00e5ff" text-anchor="middle">CYL 1</text>
+    </g>
+
+    <!-- Transmission Casting (EGS6) -->
+    <rect x="420" y="780" width="530" height="100" rx="12" fill="#161b22" stroke="#ffd600" stroke-width="1.8" opacity="0.85"/>
+    <text x="685" y="805" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="bold" fill="#ffd600" text-anchor="middle">EGS6 6-SPEED ROBOTIZED TRANSMISSION CASING</text>
+
+    <!-- Battery Box Silhouette -->
+    <rect x="880" y="780" width="160" height="100" rx="10" fill="#161b22" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <text x="960" y="805" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="bold" fill="#8b949e" text-anchor="middle">12V BATTERY / BSM</text>
+
+    <!-- Air Filter Box Silhouette -->
+    <rect x="80" y="630" width="160" height="100" rx="10" fill="#161b22" stroke="#00e5ff" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <text x="160" y="655" font-family="'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="bold" fill="#8b949e" text-anchor="middle">AIR CLEANER BOX</text>
+
+    <!-- Insert all 20 Sensor Nodes -->
+    
+        <!-- Sensor Node #01 -->
+        <g transform="translate(160,680)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e5ff" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e5ff" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e5ff" text-anchor="middle">01</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">MAF Sensor</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">485.0 mg</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Air Intake</text>
+        </g>
+        
+        <!-- Sensor Node #02 -->
+        <g transform="translate(750,290)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ff9100" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ff9100" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ff9100" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ff9100" text-anchor="middle">02</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Garrett Turbo</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">1.02 bar</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Boost</text>
+        </g>
+        
+        <!-- Sensor Node #03 -->
+        <g transform="translate(320,160)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e5ff" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e5ff" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e5ff" text-anchor="middle">03</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Intercooler</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">0.04 bar dp</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Charge Air</text>
+        </g>
+        
+        <!-- Sensor Node #04 -->
+        <g transform="translate(290,310)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e5ff" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e5ff" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e5ff" text-anchor="middle">04</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">MAP / IAT</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">1024 mb</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Intake</text>
+        </g>
+        
+        <!-- Sensor Node #05 -->
+        <g transform="translate(160,480)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ffd600" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ffd600" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ffd600" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ffd600" text-anchor="middle">05</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">HP CP1H Pump</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">38.5 °C</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Common Rail</text>
+        </g>
+        
+        <!-- Sensor Node #06 -->
+        <g transform="translate(510,470)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ffd600" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ffd600" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ffd600" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ffd600" text-anchor="middle">06</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Common Rail</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">298.0 bar</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Common Rail</text>
+        </g>
+        
+        <!-- Sensor Node #07 -->
+        <g transform="translate(680,470)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ffd600" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ffd600" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ffd600" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ffd600" text-anchor="middle">07</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Rail Pressure</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">295.0 bar</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Sensor</text>
+        </g>
+        
+        <!-- Sensor Node #08 -->
+        <g transform="translate(510,390)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ffd600" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ffd600" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ffd600" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ffd600" text-anchor="middle">08</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Injectors 1-4</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">Bal: +0.2</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Fuel</text>
+        </g>
+        
+        <!-- Sensor Node #09 -->
+        <g transform="translate(820,210)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ff9100" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ff9100" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ff9100" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ff9100" text-anchor="middle">09</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">VNT Solenoid</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">42.5%</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Vacuum</text>
+        </g>
+        
+        <!-- Sensor Node #10 -->
+        <g transform="translate(960,310)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ff1744" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ff1744" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ff1744" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ff1744" text-anchor="middle">10</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Pre-Cat EGT</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">188.0 °C</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Exhaust</text>
+        </g>
+        
+        <!-- Sensor Node #11 -->
+        <g transform="translate(960,470)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ff5252" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ff5252" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ff5252" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ff5252" text-anchor="middle">11</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">DPF (FAP)</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">18.4 g</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Filter</text>
+        </g>
+        
+        <!-- Sensor Node #12 -->
+        <g transform="translate(960,620)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ff5252" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ff5252" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ff5252" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ff5252" text-anchor="middle">12</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Diff Pressure</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">8.5 mb</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Exhaust</text>
+        </g>
+        
+        <!-- Sensor Node #13 -->
+        <g transform="translate(750,660)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#b388ff" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#b388ff" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#b388ff" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#b388ff" text-anchor="middle">13</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">EGR Valve</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">34.0%</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Emissions</text>
+        </g>
+        
+        <!-- Sensor Node #14 -->
+        <g transform="translate(510,670)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e676" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e676" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e676" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e676" text-anchor="middle">14</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">ECT Temp</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">86.4 °C</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Cooling</text>
+        </g>
+        
+        <!-- Sensor Node #15 -->
+        <g transform="translate(160,830)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e676" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e676" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e676" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e676" text-anchor="middle">15</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">CKP Crank</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">850 RPM</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Timing</text>
+        </g>
+        
+        <!-- Sensor Node #16 -->
+        <g transform="translate(290,210)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e676" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e676" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e676" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e676" text-anchor="middle">16</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">CMP Cam</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">SYNCHRONIZED</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Timing</text>
+        </g>
+        
+        <!-- Sensor Node #17 -->
+        <g transform="translate(510,830)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e5ff" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e5ff" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e5ff" text-anchor="middle">17</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">EGS6 Gearbox</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">N (Neutral)</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Trans</text>
+        </g>
+        
+        <!-- Sensor Node #18 -->
+        <g transform="translate(690,830)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e5ff" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e5ff" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e5ff" text-anchor="middle">18</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">EGS6 Pump</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">48.2 bar</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Hydraulic</text>
+        </g>
+        
+        <!-- Sensor Node #19 -->
+        <g transform="translate(870,830)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#00e5ff" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#00e5ff" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#00e5ff" text-anchor="middle">19</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Clutch Slave</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">14.8 mm</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Clutch</text>
+        </g>
+        
+        <!-- Sensor Node #20 -->
+        <g transform="translate(960,830)">
+          <rect x="-80" y="-32" width="160" height="64" rx="8" fill="#161b22" stroke="#ffd600" stroke-width="2" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.6))"/>
+          <circle cx="-56" cy="-10" r="14" fill="#ffd600" opacity="0.25"/>
+          <circle cx="-56" cy="-10" r="14" fill="none" stroke="#ffd600" stroke-width="1.5"/>
+          <text x="-56" y="-5" font-family="'DejaVu Sans Mono', monospace" font-size="12" font-weight="bold" fill="#ffd600" text-anchor="middle">20</text>
+          <text x="-34" y="-8" font-family="'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#ffffff">12V Battery</text>
+          <text x="-70" y="18" font-family="'DejaVu Sans Mono', monospace" font-size="13" font-weight="bold" fill="#00e676">14.28 V</text>
+          <text x="70" y="18" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" fill="#8b949e" text-anchor="end">Electric</text>
+        </g>
+        
+  </g>
+
+  <!-- RIGHT PANE: SENSOR DATABASE & LOCATION LEGEND (Width: 640) -->
+  <g transform="translate(1135, 110)">
+    <rect x="0" y="0" width="640" height="960" rx="16" fill="#0d1117" stroke="#30363d" stroke-width="2"/>
+    
+    <!-- Table Header Banner -->
+    <rect x="15" y="15" width="610" height="42" rx="8" fill="#161b22" stroke="#30363d"/>
+    <text x="30" y="42" font-family="'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="bold" fill="#00e5ff">📋 20-NODE SENSOR CATALOG &amp; TEST SPECS</text>
+
+    <!-- Embed ForeignObject Table -->
+    <foreignObject x="15" y="65" width="610" height="880">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:'Segoe UI',Roboto,sans-serif; color:#c9d1d9;">
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr style="background:#161b22; text-align:left; font-size:11px; color:#8b949e; border-bottom:1px solid #30363d;">
+              <th style="padding:6px 8px;">ID</th>
+              <th style="padding:6px 8px;">Sensor Name</th>
+              <th style="padding:6px 8px;">Physical Location</th>
+              <th style="padding:6px 8px;">Live Telemetry</th>
+              <th style="padding:6px 8px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[01]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Mass Air Flow Sensor (Dé</td>
+          <td style="padding:6px 8px; color:#8b949e;">Intake duct between air filter...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">485.0 mg/stroke</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[02]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Garrett GT1544V Variable</td>
+          <td style="padding:6px 8px; color:#8b949e;">Front-center of engine block b...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">1.02 bar</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[03]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Air-to-Air Boost Interco</td>
+          <td style="padding:6px 8px; color:#8b949e;">Mounted in lower front bumper ...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">0.04 bar</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[04]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Manifold Absolute Pressu</td>
+          <td style="padding:6px 8px; color:#8b949e;">On top plastic air intake dosi...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">1024 mbar</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[05]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Bosch CP1H High Pressure</td>
+          <td style="padding:6px 8px; color:#8b949e;">Upper left of cylinder head, d...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">38.5 °C</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[06]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Forged Steel High Pressu</td>
+          <td style="padding:6px 8px; color:#8b949e;">Mounted under intake manifold ...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">298.0 bar</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[07]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Common Rail Pressure Sen</td>
+          <td style="padding:6px 8px; color:#8b949e;">Screwed into underside of fuel...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">295.0 bar</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[08]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Bosch Common Rail Inject</td>
+          <td style="padding:6px 8px; color:#8b949e;">Deep wells in cylinder head (C...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">0.2 mg/str</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[09]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Turbo Boost Control Elec</td>
+          <td style="padding:6px 8px; color:#8b949e;">Mounted low behind engine bloc...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">42.5 %</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[10]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Pre-Catalyst Exhaust Gas</td>
+          <td style="padding:6px 8px; color:#8b949e;">Screwed directly into top elbo...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">188.0 °C</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[11]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Catalytic Converter &amp; Di</td>
+          <td style="padding:6px 8px; color:#8b949e;">Vertical canister in front of ...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">18.4 g</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[12]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">DPF Exhaust Differential</td>
+          <td style="padding:6px 8px; color:#8b949e;">Bolted to battery tray bracket...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">8.5 mbar</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[13]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Electric EGR Valve with </td>
+          <td style="padding:6px 8px; color:#8b949e;">Rear right of cylinder head ab...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">34.0 %</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[14]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Engine Coolant Temperatu</td>
+          <td style="padding:6px 8px; color:#8b949e;">Water outlet housing on right ...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">86.4 °C</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[15]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Crankshaft Engine Speed </td>
+          <td style="padding:6px 8px; color:#8b949e;">Lower front engine block near ...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">850 RPM</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[16]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">Camshaft Phase Identific</td>
+          <td style="padding:6px 8px; color:#8b949e;">Upper front of cylinder head p...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">SYNCHRONIZED state</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">OK</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[17]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">EGS6 6-Speed Piloted Man</td>
+          <td style="padding:6px 8px; color:#8b949e;">Right side of engine bay benea...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">N (Neutral) </td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">OK</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[18]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">EGS6 Hydraulic Power Pac</td>
+          <td style="padding:6px 8px; color:#8b949e;">Bolted to front-top of transmi...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">48.2 bar</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#161b22; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[19]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">EGS6 Clutch Slave Cylind</td>
+          <td style="padding:6px 8px; color:#8b949e;">Bolted to clutch bellhousing, ...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">14.8 mm</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+        <tr style="background:#11161d; font-size:11px;">
+          <td style="padding:6px 8px; font-weight:bold; color:#00e5ff; font-family:monospace;">[20]</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#ffffff;">12V Lead-Acid Starter Ba</td>
+          <td style="padding:6px 8px; color:#8b949e;">Rear right of engine bay under...</td>
+          <td style="padding:6px 8px; font-weight:bold; color:#00e676; font-family:monospace;">14.28 V</td>
+          <td style="padding:6px 8px;"><span style="background:rgba(0,230,118,0.15); color:#00e676; border:1px solid #00e676; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">NOMINAL</span></td>
+        </tr>
+        
+          </tbody>
+        </table>
+        
+        <div style="margin-top:14px; padding:10px 14px; background:#161b22; border:1px solid #30363d; border-radius:6px; font-size:11px; line-height:1.5;">
+          <div style="color:#00e5ff; font-weight:bold; margin-bottom:4px;">📌 TECHNICIAN DIAGNOSTIC NOTES (DV6 1.6 HDi):</div>
+          • <b>Cylinder Numbering:</b> PSA counts Cylinder 1 at the <b>flywheel/gearbox side</b> (right side of engine bay).<br/>
+          • <b>Common Rail Pressure:</b> Normal warm idle is 250–300 bar (~1.0–1.2V signal from rail sensor [07]).<br/>
+          • <b>EGS6 Hydraulics:</b> Nominal accumulator pressure [18] is 40–50 bar. Pump auto-priming on driver door open.
+        </div>
+      </div>
+    </foreignObject>
+  </g>
+</svg>

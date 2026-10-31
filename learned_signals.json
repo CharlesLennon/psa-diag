@@ -1,0 +1,26 @@
+[
+  {
+    "name": "BRAKE_PEDAL_SWITCH",
+    "can_id": "0x217",
+    "byte_idx": 2,
+    "bit_mask": "0x01",
+    "description": "Dual-contact primary brake pedal switch (1=Pressed, 0=Released)",
+    "learned_on": "2026-10-27"
+  },
+  {
+    "name": "EGS6_GEAR_SELECTOR",
+    "can_id": "0x128",
+    "byte_idx": 1,
+    "bit_mask": "0xFF",
+    "description": "Piloted manual gearbox selector (0x10=N, 0x20=1st, 0x30=2nd, 0x40=R)",
+    "learned_on": "2026-10-27"
+  },
+  {
+    "name": "ELECTRIC_HANDBRAKE_SWITCH",
+    "can_id": "0x388",
+    "byte_idx": 1,
+    "bit_mask": "0x03",
+    "description": "FSE dashboard lever pull/push state (0x01=Applied, 0x02=Released)",
+    "learned_on": "2026-10-27"
+  }
+]
